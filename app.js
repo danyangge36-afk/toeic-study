@@ -20,7 +20,8 @@ let state = {
   wrongbook: [],        // {pool, idx, qIdx, ts}
   mockHistory: [],
   planChecks: {},       // 30 天计划勾选 "w周t任务" -> true
-  poolStats: {}         // 各题库作答统计 {pool: {a, c}}
+  poolStats: {},        // 各题库作答统计 {pool: {a, c}}
+  challengeLog: {}      // 每日挑战完成记录 {"YYYY-MM-DD": true}
 };
 function saveState() {
   try { localStorage.setItem(STORE_KEY, JSON.stringify(state)); } catch (e) { /* file:// 或隐私模式 */ }
@@ -35,6 +36,8 @@ loadState();
 state.planChecks = state.planChecks || {};   // 兼容旧存档
 state.stats.days = state.stats.days || {};
 state.poolStats = state.poolStats || {};
+state.challengeLog = state.challengeLog || {};
+state.wrongbook.forEach((e) => { if (e.box === undefined) { e.box = 0; e.next = 0; } });
 
 const POOL_LABEL = { p1: "Part 1 照片", p2: "Part 2 问答", p3: "Part 3 对话", p4: "Part 4 短文", p5: "Part 5 填空", p6: "Part 6 长文", p7: "Part 7 阅读", dict: "听写" };
 const ALL_POOLS = { p1: P1_DATA, p2: P2_DATA, p3: P3_DATA, p4: P4_DATA, p5: P5_DATA, p6: P6_DATA, p7: P7_DATA };
@@ -69,7 +72,7 @@ function recordAnswer(isCorrect, wrongEntry, pool) {
 function addWrong(entry) {
   const key = (e) => e.pool + ":" + e.idx + ":" + e.qIdx;
   if (!state.wrongbook.some((e) => key(e) === key(entry))) {
-    state.wrongbook.push(Object.assign({ ts: Date.now() }, entry));
+    state.wrongbook.push(Object.assign({ ts: Date.now(), box: 0, next: 0 }, entry));
   }
 }
 
@@ -159,13 +162,22 @@ function go(view) {
   stopSpeak();
   currentView = view;
   $$(".nav-btn").forEach((b) => b.classList.toggle("active", b.dataset.view === view));
-  const fn = { dashboard: renderDashboard, vocab: renderVocab, listening: renderListening, dictation: renderDictation, reading: renderReading, mock: renderMock, wrong: renderWrong, guide: renderGuide }[view];
+  const fn = { dashboard: renderDashboard, vocab: renderVocab, listening: renderListening, dictation: renderDictation, reading: renderReading, mock: renderMock, wrong: renderWrong, guide: renderGuide, challenge: renderChallenge }[view];
   $("#view").innerHTML = "";
   fn($("#view"));
   window.scrollTo(0, 0);
 }
 
 function isDark() { return document.documentElement.classList.contains("dark"); }
+function rateChipsHTML(id) {
+  return `<label class="lbl" style="margin-top:10px">朗读速度（即点即用）</label><div class="chips" id="${id}">${[0.75, 0.9, 0.95, 1, 1.1].map((r) => `<button class="chip ${Math.abs(state.settings.rate - r) < 0.01 ? "active" : ""}" data-rate="${r}">${r}x</button>`).join("")}</div>`;
+}
+function bindRateChips(id) {
+  $$("#" + id + " .chip").forEach((ch) => ch.addEventListener("click", () => {
+    state.settings.rate = parseFloat(ch.dataset.rate); saveState();
+    $$("#" + id + " .chip").forEach((x) => x.classList.toggle("active", x === ch));
+  }));
+}
 function applyTheme() {
   document.documentElement.classList.toggle("dark", !!state.settings.darkMode);
   const b = $("#themeBtn");
@@ -182,6 +194,10 @@ function renderDashboard(root) {
   <div class="hero">
     <h1>TOEIC 高分学习助手</h1>
     <p>词汇 · 听力 · 听写 · 阅读 · 模考 · 错题本 —— 系统训练，目标高分</p>
+  </div>
+  <div class="card challenge-todo" style="border-color:var(--brand)">
+    <h3>🗓️ 今日挑战</h3>
+    ${challengeDoneToday() ? `<p>✅ <b>今日挑战已完成</b>，又点亮了一天！</p><button class="btn" id="chStart">再练一轮（可选）</button>` : `<p>每天一组固定混合题：4 个单词 + 4 道题（优先弱项）+ 2 道错题，完成即点亮今天。</p><button class="btn big" id="chStart">开始今日挑战（约 8 分钟）</button>`}
   </div>
   <div class="grid grid-3">
     <div class="card">
@@ -255,6 +271,7 @@ function renderDashboard(root) {
     if (confirm("确定清空所有学习记录吗？此操作不可恢复。")) { state = { settings: state.settings, stats: { answered: 0, correct: 0, days: {} }, vocab: {}, wrongbook: [], mockHistory: [], planChecks: {}, poolStats: {} }; saveState(); renderDashboard(root); }
   });
   $$("[data-go]", root).forEach((b) => b.addEventListener("click", () => go(b.dataset.go)));
+  const ch = $("#chStart"); if (ch) ch.addEventListener("click", () => go("challenge"));
   initVoices();
 }
 function getRecommendation() {
@@ -370,6 +387,7 @@ function renderVocab(root) {
     <div style="margin-top:12px">
       <button class="btn big" id="learnBtn">📇 闪卡学习</button>
       <button class="btn big" id="quizBtn">✅ 选择测验</button>
+      <button class="btn" id="csvBtn">⬇️ 导出 Anki / CSV 词表</button>
       <span class="muted" style="margin-left:8px">建议先闪卡再测验，每次 10 词</span>
     </div>
   </div>
@@ -381,6 +399,16 @@ function renderVocab(root) {
   }));
   $("#learnBtn").addEventListener("click", () => startVocab("learn", catId));
   $("#quizBtn").addEventListener("click", () => startVocab("quiz", catId));
+  $("#csvBtn").addEventListener("click", () => {
+    const rows = [["word", "meaning", "example", "category"]];
+    VOCAB_DATA.forEach((c) => c.words.forEach((w) => rows.push([w.w, w.zh, w.ex, c.name].map((x) => '"' + String(x).replace(/"/g, '""') + '"'))));
+    const blob = new Blob(["\ufeff" + rows.map((r) => r.join(",")).join("\n")], { type: "text/csv;charset=utf-8" });
+    const a = document.createElement("a");
+    a.href = URL.createObjectURL(blob);
+    a.download = "toeic-words.csv";
+    document.body.appendChild(a); a.click(); a.remove();
+    setTimeout(() => URL.revokeObjectURL(a.href), 3000);
+  });
 }
 function startVocab(mode, catId) {
   let list = dueWords(catId);
@@ -451,8 +479,8 @@ let listenSession = null;
 const LISTEN_PARTS = [
   ["p1", "Part 1 · 照片描述", "12 题", "听 4 句描述选最符合的"],
   ["p2", "Part 2 · 应答", "40 题", "听问题选最佳回应（3 选 1）"],
-  ["p3", "Part 3 · 对话", "12 组 × 3 题", "先读题再听对话"],
-  ["p4", "Part 4 · 短文", "10 篇 × 3 题", "广播、留言、广告等独白"]
+  ["p3", "Part 3 · 对话", "16 组 × 3 题", "先读题再听对话"],
+  ["p4", "Part 4 · 短文", "12 篇 × 3 题", "广播、留言、广告等独白"]
 ];
 function renderListening(root) {
   root.innerHTML = `
@@ -460,6 +488,7 @@ function renderListening(root) {
   <div class="card">
     <div class="chips" id="lParts">${LISTEN_PARTS.map((p, i) => `<button class="chip ${i === 0 ? "active" : ""}" data-part="${p[0]}">${p[1]}（${p[2]}）</button>`).join("")}</div>
     <p class="muted" id="lPartDesc"></p>
+    ${rateChipsHTML("lRate")}
     <button class="btn big" id="lStart">开始练习</button>
   </div>
   <div id="lArea"></div>`;
@@ -467,6 +496,7 @@ function renderListening(root) {
   const desc = () => $("#lPartDesc").textContent = LISTEN_PARTS.find((p) => p[0] === part)[3];
   desc();
   $$("#lParts .chip", root).forEach((ch) => ch.addEventListener("click", () => { $$("#lParts .chip", root).forEach((c) => c.classList.remove("active")); ch.classList.add("active"); part = ch.dataset.part; desc(); }));
+  bindRateChips("lRate");
   $("#lStart").addEventListener("click", () => startListening(part));
 }
 function startListening(part) {
@@ -577,15 +607,24 @@ function renderReadItem() {
   if (sess.i >= sess.items.length) { area.innerHTML = `<div class="card"><h3>🎉 本组练习完成！</h3><button class="btn" onclick="startReading('${sess.part}')">再来一组</button></div>`; return; }
   const it = sess.items[sess.i], d = ALL_POOLS[sess.part][it.idx];
   if (sess.part === "p5") {
+    if (readSession.timer) clearInterval(readSession.timer);
+    const t0 = Date.now();
+    readSession.timer = setInterval(() => {
+      const el = $("#qt");
+      if (!el) { clearInterval(readSession.timer); return; }
+      const sec = Math.floor((Date.now() - t0) / 1000);
+      el.textContent = "⏱ " + sec + "s / 目标 30s";
+      el.style.color = sec > 30 ? "var(--bad)" : sec > 20 ? "#f59e0b" : "var(--good)";
+    }, 500);
     area.innerHTML = `
     <div class="card">
-      <div class="fc-meta">Part 5 · 第 ${sess.i + 1} / ${sess.items.length} 题</div>
+      <div class="fc-meta">Part 5 · 第 ${sess.i + 1} / ${sess.items.length} 题 <span id="qt" style="float:right">⏱ 0s / 目标 30s</span></div>
       <div class="q-text">${esc(d.q)}</div>
       <div id="rpChoices">${d.choices.map((c, k) => `<button class="opt" data-k="${k}"><b>${LETTERS[k]}.</b> ${esc(c)}</button>`).join("")}</div>
       <div id="rpFeed"></div>
       <div class="btn-row" style="margin-top:10px"><button class="btn" id="rNext">${sess.i + 1 >= sess.items.length ? "完成 →" : "下一题 →"}</button></div>
     </div>`;
-    $$("#rpChoices .opt").forEach((b) => b.addEventListener("click", () => answerChoice("p5", it.idx, null, +b.dataset.k, b, "rpChoices", "rpFeed", null)));
+    $$("#rpChoices .opt").forEach((b) => b.addEventListener("click", () => { if (readSession.timer) clearInterval(readSession.timer); answerChoice("p5", it.idx, null, +b.dataset.k, b, "rpChoices", "rpFeed", null); }));
   } else if (sess.part === "p6") {
     area.innerHTML = `
     <div class="card">
@@ -650,10 +689,12 @@ function renderDictation(root) {
   <div class="page-head"><h1>👂 听写训练</h1><p class="muted">最硬核的听力训练：听一句、写一句，系统逐词批改（大小写和标点不计）。先播一遍完整句子，写不出再重播。快捷键：数字 1-4 可用于选择题页，Enter 进入下一题。</p></div>
   <div class="card">
     <button class="btn big" id="dtStart">开始听写（每次 5 句）</button>
-    <p class="muted">句子来自 Part 2-4 题库，随机抽取（共 ${dictationSentences().length} 句）。建议朗读速度先调到 0.8 倍，逐步提速。</p>
+    ${rateChipsHTML("dtRate")}
+    <p class="muted">句子来自 Part 2-4 题库，随机抽取（共 ${dictationSentences().length} 句）。建议 0.75 倍速起步，逐步提速。</p>
   </div>
   <div id="dtArea"></div>`;
   $("#dtStart").addEventListener("click", startDictation);
+  bindRateChips("dtRate");
 }
 function startDictation() {
   dict = { list: shuffle(dictationSentences()).slice(0, 5), i: 0 };
@@ -693,6 +734,122 @@ function renderDictItem() {
   $("#dtNext").addEventListener("click", () => { dict.i++; renderDictItem(); });
 }
 
+/* ============ 每日挑战 ============ */
+let challenge = null;
+function hashStr(s) { let h = 2166136261; for (let i = 0; i < s.length; i++) { h ^= s.charCodeAt(i); h = Math.imul(h, 16777619); } return h >>> 0; }
+function seededShuffle(arr, seed) {
+  let t = seed >>> 0;
+  const rnd = () => { t += 0x6D2B79F5; let r = Math.imul(t ^ (t >>> 15), 1 | t); r ^= r + Math.imul(r ^ (r >>> 7), 61 | r); return ((r ^ (r >>> 14)) >>> 0) / 4294967296; };
+  const a = arr.slice();
+  for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(rnd() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; }
+  return a;
+}
+function challengeDoneToday() { return !!(state.challengeLog && state.challengeLog[todayStr()]); }
+function buildDailyChallenge() {
+  const seed = hashStr(todayStr());
+  const items = [];
+  const due = dueWords("all");
+  const allV = VOCAB_DATA.reduce((a, c) => a.concat(c.words.map((w, i) => ({ cat: c, i: i, w: w }))), []);
+  const vpool = due.length >= 4 ? due : allV;
+  seededShuffle(vpool, seed).slice(0, 4).forEach((v) => items.push({ type: "v", v: v }));
+  const pools = ["p1", "p2", "p3", "p4", "p5", "p6", "p7"];
+  let weakPool = null;
+  Object.keys(state.poolStats).forEach((k) => {
+    const s = state.poolStats[k];
+    if (pools.includes(k) && s.a >= 4) { const acc = s.c / s.a; if (!weakPool || acc < weakPool.acc) weakPool = { k: k, acc: acc }; }
+  });
+  const pickQ = (pool, salt) => {
+    const d = ALL_POOLS[pool];
+    const idx = seededShuffle(d.map((_, i) => i), seed + hashStr(pool) + salt)[0];
+    const qn = pool === "p6" ? 4 : (d[idx].questions ? d[idx].questions.length : 1);
+    const qIdx = seededShuffle([0, 1, 2, 3].slice(0, qn), seed + hashStr(pool) + salt + 11)[0];
+    return { type: "q", pool: pool, idx: idx, qIdx: qIdx };
+  };
+  if (weakPool) items.push(pickQ(weakPool.k, 1));
+  items.push(pickQ(seededShuffle(pools, seed)[0], 2));
+  items.push(pickQ(seededShuffle(pools, seed + 7)[0], 3));
+  if (weakPool) items.push(pickQ(weakPool.k, 4));
+  seededShuffle(state.wrongbook, seed).slice(0, 2).forEach((e) => items.push({ type: "w", e: e }));
+  return items;
+}
+function renderChallenge(root) {
+  const done = challengeDoneToday();
+  root.innerHTML = `
+  <div class="page-head"><h1>🗓️ 今日挑战</h1><p class="muted">每天一组固定混合题（当天不变）：4 个单词 + 4 道题（优先你的弱项）+ 2 道错题。完成即点亮今天。</p></div>
+  <div class="card center">
+    ${done ? `<p style="font-size:18px">✅ <b>今天的挑战已完成</b>，连续点亮每一天！</p>` : `<p style="font-size:16px">准备好了吗？一共 6-10 项，约 8 分钟。</p>`}
+    <button class="btn big" id="chGo" style="text-align:center">${done ? "再练一轮（不再重复点亮）" : "开始今日挑战"}</button>
+  </div>`;
+  $("#chGo").addEventListener("click", startChallenge);
+}
+function startChallenge() {
+  challenge = { list: buildDailyChallenge(), i: 0, correct: 0 };
+  renderChallengeItem();
+}
+function renderChallengeItem() {
+  const area = $("#view");
+  if (challenge.i >= challenge.list.length) {
+    state.challengeLog[todayStr()] = true;
+    saveState();
+    area.innerHTML = `<div class="card center flashcard"><h1 style="margin:6px 0">🎉</h1><h3>今日挑战完成！答对 ${challenge.correct} / ${challenge.list.length}</h3><p class="muted">已点亮 ${todayStr()}。明天会刷新一组新题目。</p><button class="btn big" onclick="go('dashboard')" style="text-align:center">回首页</button></div>`;
+    challenge = null;
+    return;
+  }
+  const it = challenge.list[challenge.i];
+  let body = "", bind = null;
+  if (it.type === "v") {
+    const item = it.v;
+    const wrongPool = shuffle(VOCAB_DATA.reduce((a, c) => a.concat(c.words.filter((w) => w.zh !== item.w.zh && w.w.toLowerCase() !== item.w.w.toLowerCase())), [])).slice(0, 3).map((w) => w.zh);
+    const opts = shuffle([item.w.zh].concat(wrongPool));
+    body = `<div class="fc-meta">词汇 · ${esc(item.cat.name)}</div><div class="fc-word">${esc(item.w.w)} <button class="icon-btn" id="chSpeak">🔊</button></div>
+      <div id="chOpts">${opts.map((o) => `<button class="opt" data-ok="${o === item.w.zh ? 1 : 0}">${esc(o)}</button>`).join("")}</div><div id="chFeed"></div>`;
+    bind = () => {
+      $("#chSpeak").addEventListener("click", () => speakList([{ text: item.w.w }]));
+      if (state.settings.autoSpeak !== false) setTimeout(() => speakList([{ text: item.w.w }]), 350);
+      $$("#chOpts .opt").forEach((b) => b.addEventListener("click", () => {
+        const ok = b.dataset.ok === "1";
+        $$("#chOpts .opt").forEach((x) => { x.disabled = true; if (x.dataset.ok === "1") x.classList.add("correct"); });
+        if (!ok) b.classList.add("wrong"); else challenge.correct++;
+        $("#chFeed").innerHTML = `<div class="explain"><b>${esc(item.w.zh)}</b><br>${esc(item.w.ex)}</div>`;
+        $("#chNext").style.display = "inline-block";
+        updateVocab(item.cat.id, item.i, ok);
+      }));
+    };
+  } else if (it.type === "q") {
+    const q = getQuestion(it.pool, it.idx, it.qIdx);
+    body = `<div class="fc-meta">题目 · ${POOL_LABEL[it.pool]}</div><div class="q-text">${esc(q.q)}</div>
+      <div id="chOpts">${q.choices.map((c, k) => `<button class="opt" data-k="${k}"><b>${LETTERS[k]}.</b> ${esc(c)}</button>`).join("")}</div><div id="chFeed"></div>`;
+    bind = () => {
+      $$("#chOpts .opt").forEach((b) => b.addEventListener("click", () => {
+        const k = +b.dataset.k, ok = k === q.answer;
+        $$("#chOpts .opt").forEach((x, j) => { x.disabled = true; if (j === q.answer) x.classList.add("correct"); });
+        if (!ok) b.classList.add("wrong"); else challenge.correct++;
+        $("#chFeed").innerHTML = `<div class="explain">${ok ? "✅ 正确！" : "❌ 正确答案：" + LETTERS[q.answer] + "。"} ${esc(q.explain || "")}</div>`;
+        $("#chNext").style.display = "inline-block";
+        recordAnswer(ok, ok ? null : { pool: it.pool, idx: it.idx, qIdx: it.qIdx }, it.pool);
+      }));
+    };
+  } else {
+    const q = getQuestion(it.e.pool, it.e.idx, it.e.qIdx);
+    body = `<div class="fc-meta">错题重做 · ${POOL_LABEL[it.e.pool]}</div><div class="q-text">${esc(q.q)}</div>
+      <div id="chOpts">${q.choices.map((c, k) => `<button class="opt" data-k="${k}"><b>${LETTERS[k]}.</b> ${esc(c)}</button>`).join("")}</div><div id="chFeed"></div>`;
+    bind = () => {
+      $$("#chOpts .opt").forEach((b) => b.addEventListener("click", () => {
+        const k = +b.dataset.k, ok = k === q.answer;
+        $$("#chOpts .opt").forEach((x, j) => { x.disabled = true; if (j === q.answer) x.classList.add("correct"); });
+        if (!ok) b.classList.add("wrong"); else challenge.correct++;
+        $("#chFeed").innerHTML = `<div class="explain">${ok ? "✅ 这次答对了！" : "❌ 正确答案：" + LETTERS[q.answer] + "。"} ${esc(q.explain || "")}</div>`;
+        $("#chNext").style.display = "inline-block";
+        recordAnswer(ok, null, it.e.pool);
+        if (ok) { state.wrongbook = state.wrongbook.filter((x) => !(x.pool === it.e.pool && x.idx === it.e.idx && x.qIdx === it.e.qIdx)); saveState(); }
+      }));
+    };
+  }
+  area.innerHTML = `<div class="card flashcard"><div class="fc-meta" style="display:flex;justify-content:space-between"><span>第 ${challenge.i + 1} / ${challenge.list.length} 项</span><span>答对 ${challenge.correct}</span></div>${body}<div class="btn-row"><button class="btn" id="chNext" style="display:none">下一项 →</button></div></div>`;
+  bind();
+  $("#chNext").addEventListener("click", () => { challenge.i++; renderChallengeItem(); });
+}
+
 /* ============ 模拟考试 ============ */
 let mock = null;
 const MOCK_LABEL = { full: "全真模考", quick: "快速模考", listen: "听力专项", read: "阅读专项" };
@@ -701,7 +858,7 @@ function renderMock(root) {
   root.innerHTML = `
   <div class="page-head"><h1>⏱️ 模拟考试</h1><p class="muted">从题库随机抽题组卷，严格计时。成绩为按比例折算的<b>估算分</b>，仅供参考趋势。</p></div>
   <div class="grid grid-2">
-    <div class="card" style="border-color:var(--brand)"><h3>🏆 全真模考</h3><p>听力 97 题（P1×6 / P2×25 / P3 全部 / P4 全部）+ 阅读 100 题（P5×30 / P6×4 篇 / P7 单篇全量 + 双篇精选 6 组）<br><b>限时 120 分钟</b>（真实考试 45+75 节奏，听转读时有提示）</p><button class="btn big" data-m="full">开始</button></div>
+    <div class="card" style="border-color:var(--brand)"><h3>🏆 全真模考</h3><p>听力 100 题（P1×6 / P2×25 / P3×13 组 / P4×10 篇）+ 阅读 100 题（P5×30 / P6×4 篇 / P7 单篇全量 + 双篇精选 6 组）<br><b>标准 200 题 · 限时 120 分钟</b>（真实考试 45+75 节奏，听转读时有提示）</p><button class="btn big" data-m="full">开始</button></div>
     <div class="card"><h3>🎯 快速模考</h3><p>听力 22 题 + 阅读 26 题<br>限时 45 分钟</p><button class="btn big" data-m="quick">开始</button></div>
     <div class="card"><h3>🎧 听力专项</h3><p>Part 1-4 共 22 题<br>限时 25 分钟</p><button class="btn big" data-m="listen">开始</button></div>
     <div class="card"><h3>📖 阅读专项</h3><p>Part 5-7 共 26 题<br>限时 30 分钟</p><button class="btn big" data-m="read">开始</button></div>
@@ -714,7 +871,7 @@ function buildMockItems(kind) {
   let L = [], R = [];
   if (kind === "full") {
     L = [].concat(pick("p1", Math.min(6, ALL_POOLS.p1.length)), pick("p2", Math.min(25, ALL_POOLS.p2.length)),
-      ALL_POOLS.p3.map((_, i) => ({ pool: "p3", idx: i })), ALL_POOLS.p4.map((_, i) => ({ pool: "p4", idx: i })));
+      shuffle(ALL_POOLS.p3.map((_, i) => ({ pool: "p3", idx: i }))).slice(0, 13), shuffle(ALL_POOLS.p4.map((_, i) => ({ pool: "p4", idx: i }))).slice(0, 10));
     const singles = ALL_POOLS.p7.map((d, i) => ({ pool: "p7", idx: i })).filter((x) => !ALL_POOLS.p7[x.idx].double);
     const doubles = ALL_POOLS.p7.map((d, i) => ({ pool: "p7", idx: i })).filter((x) => ALL_POOLS.p7[x.idx].double);
     R = [].concat(pick("p5", Math.min(30, ALL_POOLS.p5.length)), shuffle(ALL_POOLS.p6.map((_, i) => ({ pool: "p6", idx: i }))).slice(0, 4), shuffle(singles), shuffle(doubles).slice(0, 6));
@@ -856,17 +1013,22 @@ function finishMock() {
 
 /* ============ 错题本 ============ */
 function renderWrong(root) {
+  const now = Date.now();
+  const due = state.wrongbook.filter((e) => (e.next || 0) <= now);
   root.innerHTML = `
-  <div class="page-head"><h1>❌ 错题本</h1><p class="muted">做错的题自动收录。重练答对后自动移出；建议每周清空一次错题本。</p></div>
+  <div class="page-head"><h1>❌ 错题本</h1><p class="muted">错题按遗忘曲线安排复习：重练答对 → 1 天后重现 → 再对 → 3 天后 → 再对 → 7 天后 → 第四次答对才移出。答错则从头再来。</p></div>
   <div class="card">
-    <button class="btn big" id="wPractice" ${state.wrongbook.length ? "" : "disabled"}>开始重练（${state.wrongbook.length} 题）</button>
+    <div class="stat-row"><span>待复习（已到期）</span><b>${due.length} 题</b></div>
+    <div class="stat-row"><span>错题本总数</span><b>${state.wrongbook.length} 题</b></div>
+    <button class="btn big" id="wPractice" ${state.wrongbook.length ? "" : "disabled"}>${due.length ? "开始重练（先复习到期的 " + Math.min(15, due.length) + " 题）" : "开始重练（全部 " + state.wrongbook.length + " 题）"}</button>
     <button class="btn danger" id="wClear" ${state.wrongbook.length ? "" : "disabled"}>清空错题本</button>
   </div>
   <div id="wArea">
-    ${state.wrongbook.length ? `<div class="card">${state.wrongbook.slice().reverse().map((e, ri) => {
+    ${state.wrongbook.length ? `<div class="card">${state.wrongbook.slice().reverse().map((e) => {
     const q = getQuestion(e.pool, e.idx, e.qIdx);
     const d = ALL_POOLS[e.pool][e.idx];
-    return `<details class="wrong-item"><summary>【${POOL_LABEL[e.pool]}】${esc((q.q || d.title || "").slice(0, 60))}</summary>
+    const nextTxt = (e.next || 0) > now ? " · 下次复习 " + fmtDate(e.next) : " · <b>已到期</b>";
+    return `<details class="wrong-item"><summary>【${POOL_LABEL[e.pool]}】${esc((q.q || d.title || "").slice(0, 60))}<span class="muted">${nextTxt}</span></summary>
         <div class="explain">题目：${esc(q.q || "")}<br>正确答案：<b>${LETTERS[q.answer]}. ${esc(q.choices[q.answer])}</b><br>${esc(q.explain || "")}</div></details>`;
   }).join("")}</div>` : `<div class="card note">错题本是空的，去刷题吧！错题会自动收录在这里。</div>`}
   </div>`;
@@ -876,12 +1038,14 @@ function renderWrong(root) {
   }
 }
 function renderWrongPractice(root) {
-  const list = shuffle(state.wrongbook).slice(0, 15);
-  let i = 0, removed = 0;
+  const now = Date.now();
+  const due = state.wrongbook.filter((e) => (e.next || 0) <= now);
+  const list = shuffle(due.length ? due : state.wrongbook).slice(0, 15);
+  let i = 0, passed = 0, cleared = 0;
   const next = () => {
     if (i >= list.length) {
       saveState();
-      $("#wArea").innerHTML = `<div class="card"><h3>🎉 重练完成！</h3><p>答对 ${list.length - removed} / ${list.length}，答对的题已从错题本移出。</p><button class="btn" onclick="go('wrong')">返回错题本</button></div>`;
+      $("#wArea").innerHTML = `<div class="card"><h3>🎉 重练完成！</h3><p>本轮答对 ${passed} / ${list.length}。答对的题进入更长复习间隔，连续答对三次的题已移出错题本（本轮移出 ${cleared} 题）。</p><button class="btn" onclick="go('wrong')">返回错题本</button></div>`;
       return;
     }
     const e = list[i], q = getQuestion(e.pool, e.idx, e.qIdx);
@@ -897,9 +1061,12 @@ function renderWrongPractice(root) {
       const k = +b.dataset.k, ok = k === q.answer;
       $$("#wOpts .opt").forEach((x, j) => { x.disabled = true; if (j === q.answer) x.classList.add("correct"); });
       if (!ok) b.classList.add("wrong");
-      $("#wFeed").innerHTML = `<div class="explain">${ok ? "✅ 答对了，已从错题本移出" : "❌ 再看看解析"}<br>${esc(q.explain || "")}</div>`;
-      if (ok) { state.wrongbook = state.wrongbook.filter((x) => !(x.pool === e.pool && x.idx === e.idx && x.qIdx === e.qIdx)); removed++; }
-      else { recordAnswer(false, null, e.pool); } // 仍然算作答，但保留在错题本
+      $("#wFeed").innerHTML = `<div class="explain">${ok ? "✅ 答对了！" : "❌ 再看看解析"}<br>${esc(q.explain || "")}</div>`;
+      if (ok) {
+        passed++;
+        if ((e.box || 0) >= 2) { state.wrongbook = state.wrongbook.filter((x) => !(x.pool === e.pool && x.idx === e.idx && x.qIdx === e.qIdx)); cleared++; }
+        else { e.box = (e.box || 0) + 1; e.next = Date.now() + [1, 3, 7][e.box] * 86400000; }
+      } else { e.box = 0; e.next = 0; recordAnswer(false, null, e.pool); }
       $("#wNext").style.display = "inline-block";
     }));
     $("#wNext").addEventListener("click", () => { i++; next(); });
@@ -983,7 +1150,7 @@ document.addEventListener("keydown", (e) => {
   const tag = (e.target.tagName || "").toLowerCase();
   if (tag === "input" || tag === "textarea" || tag === "select" || e.ctrlKey || e.metaKey || e.altKey) return;
   if (e.key === "Enter") {
-    const btn = ["#lNext", "#rNext", "#qNext", "#wNext", "#dtNext"].map((s) => $(s)).find((b) => b && b.style.display !== "none" && !b.disabled);
+    const btn = ["#lNext", "#rNext", "#qNext", "#wNext", "#dtNext", "#chNext"].map((s) => $(s)).find((b) => b && b.style.display !== "none" && !b.disabled);
     if (btn) { e.preventDefault(); btn.click(); }
     return;
   }

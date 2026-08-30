@@ -374,6 +374,70 @@ const P3_DATA = [
       { q: "Why is the desk empty?", choices: ["Kenji transferred", "The design team moved in", "It is being repaired"], answer: 0, explain: "empty now that Kenji transferred。" },
       { q: "What will the man ask IT to do?", choices: ["Print an access card", "Set up a computer and phone", "Move a desk upstairs"], answer: 1, explain: "ask IT to set up a computer and phone。" }
     ]
+  },
+  {
+    title: "对话 13 · 复印机采购比价",
+    script: [
+      "M: Risa, we got two quotes for the new copy machines. The one from Tanaka Systems is cheaper, but the service contract only covers weekdays.",
+      "W: Our heaviest printing is on weekdays anyway, but weekends happen during the busy season. What is the price difference?",
+      "M: About thirty thousand yen per year. The other vendor, OfficePro, charges more but includes weekend service and free toner.",
+      "W: Free toner alone could be worth it. We replace cartridges almost every month.",
+      "M: That is true. Let me calculate the total cost for three years under both plans and e-mail it to you this afternoon.",
+      "W: Good. If the gap is small, let's go with the better service."
+    ],
+    questions: [
+      { q: "What is different about OfficePro's contract?", choices: ["It includes weekend service", "It is 30,000 yen cheaper", "It excludes toner"], answer: 0, explain: "charges more but includes weekend service and free toner。" },
+      { q: "Why is free toner attractive?", choices: ["They replace cartridges almost every month", "They print only on weekends", "Their printing budget was cut"], answer: 0, explain: "We replace cartridges almost every month。" },
+      { q: "What will the man do this afternoon?", choices: ["Sign with Tanaka Systems", "E-mail a three-year cost comparison", "Visit the OfficePro office"], answer: 1, explain: "calculate the total cost for three years... and e-mail it to you this afternoon。" }
+    ]
+  },
+  {
+    title: "对话 14 · 会议室撞期",
+    script: [
+      "W: Mr. Gray, we have a problem. The client team booked conference room A for Friday morning, but the training session is also scheduled there.",
+      "M: How many people are coming to the client meeting?",
+      "W: Eight. The training has twelve, but it could move to the small room on the second floor if we squeeze.",
+      "M: The small room only seats ten, though. The client meeting cannot move — they are visiting from Singapore.",
+      "W: Then let's move the training to next Wednesday morning. The trainer said she is flexible any day this week.",
+      "M: Do that, and send an updated notice to all trainees today."
+    ],
+    questions: [
+      { q: "What is the problem?", choices: ["The training was canceled", "Two events are booked in the same room", "The client meeting is too small"], answer: 1, explain: "同一间会议室周五上午撞期。" },
+      { q: "Why can't the client meeting be moved?", choices: ["The visitors are from overseas", "The trainer is unavailable", "Room A is under repair"], answer: 0, explain: "they are visiting from Singapore。" },
+      { q: "What will the woman do?", choices: ["Book the small room", "Reschedule the training", "E-mail the Singapore clients"], answer: 1, explain: "let's move the training to next Wednesday morning。" }
+    ]
+  },
+  {
+    title: "对话 15 · 网店差评处理",
+    script: [
+      "W: Did you see the customer review posted this morning? Someone gave our bakery two stars.",
+      "M: Yes, I read it. She said her birthday cake arrived an hour late and the name was spelled wrong.",
+      "W: That order went out during the storm on Saturday. Still, we should apologize and offer something.",
+      "M: I agree. How about a full refund plus a coupon for a free cake next time?",
+      "W: Good idea, but let's also call her directly — an e-mail feels cold for a birthday problem.",
+      "M: OK, I will call her this afternoon and follow up with an e-mail confirming the coupon."
+    ],
+    questions: [
+      { q: "What is the complaint about?", choices: ["A late delivery with a misspelled name", "A canceled birthday order", "A cold e-mail reply"], answer: 0, explain: "cake arrived an hour late and the name was spelled wrong。" },
+      { q: "What does the man propose?", choices: ["A refund and a coupon", "A free party room", "A new delivery time"], answer: 0, explain: "a full refund plus a coupon for a free cake。" },
+      { q: "Why does the woman prefer calling?", choices: ["It feels more personal", "The customer has no e-mail", "It is faster than e-mail"], answer: 0, explain: "an e-mail feels cold for a birthday problem。" }
+    ]
+  },
+  {
+    title: "对话 16 · 展会倒计时",
+    script: [
+      "M: Yuki, the trade fair starts in ten days. Did the banners arrive?",
+      "W: The big one for our booth came this morning, but the handout printer needs two more days.",
+      "M: That is cutting it close. How many handouts did we order?",
+      "W: Five hundred. The designer also sent the updated product photos — I still need approval on the final version.",
+      "M: Approve them today. And book our hotel near the venue before prices go up.",
+      "W: Already done — two rooms, three nights, next to Makuhari Messe. I will e-mail you the confirmation."
+    ],
+    questions: [
+      { q: "What has not arrived yet?", choices: ["The booth banner", "The printed handouts", "The product photos"], answer: 1, explain: "the handout printer needs two more days。" },
+      { q: "What does the man approve?", choices: ["The hotel booking", "The final product photos", "The banner design"], answer: 1, explain: "Approve them today（指 final version 的产品照片）。" },
+      { q: "What does the woman say is already done?", choices: ["Printing the handouts", "Booking the hotel", "Shipping the banner"], answer: 1, explain: "Already done — two rooms, three nights。" }
+    ]
   }
 ];
 
@@ -477,6 +541,26 @@ const P4_DATA = [
       { q: "What is being celebrated?", choices: ["The restaurant's twentieth anniversary", "A new menu launch", "The tower's opening"], answer: 0, explain: "turns twenty this month... anniversary week。" },
       { q: "What special offer applies to dinner guests?", choices: ["Half-price courses", "A free dessert", "A twenty percent coupon"], answer: 1, explain: "half price 是午餐；晚餐送 free dessert。" },
       { q: "How can customers win a dinner for two?", choices: ["By posting a photo with a tag", "By reserving a table early", "By signing up for membership"], answer: 0, explain: "post a photo with the tag Harbor View Twenty。" }
+    ]
+  },
+  {
+    title: "广播 11 · 产品演示设备预订",
+    type: "电话留言",
+    script: "Hello, this is Daisuke from the sales team. I am calling about the product demonstration next Thursday. We will need the large conference room from one to four p.m., and we would like to use the video projector and the speaker system. Could someone from facilities check the projector lamp beforehand? Last time it flickered during a client presentation. Also, we are expecting six visitors, so please arrange coffee and tea for eight people at the reception desk. I know it is a holiday week, but please confirm the arrangements by Tuesday. Thank you, and sorry for the extra requests.",
+    questions: [
+      { q: "What does the speaker need?", choices: ["Equipment for a product demonstration", "A repaired projector lamp", "Guides for six visitors"], answer: 0, explain: "主题：为下周四的产品演示借会议室和设备。" },
+      { q: "What problem happened last time?", choices: ["The projector lamp flickered", "The room was double-booked", "The coffee arrived late"], answer: 0, explain: "Last time it flickered during a client presentation。" },
+      { q: "By when should the arrangements be confirmed?", choices: ["Thursday", "Tuesday", "Monday"], answer: 1, explain: "please confirm the arrangements by Tuesday。" }
+    ]
+  },
+  {
+    title: "广播 12 · 图书馆秋季活动",
+    type: "电台通知",
+    script: "Good evening, book lovers. This is a reminder from the Harborview Public Library about our special autumn program. Starting this Friday, the library will host a weekly book club meeting every Sunday at two p.m., led by author Maria Santos. Membership is free, but registration is required because the reading room seats only twenty-five people. In addition, all overdue books returned during October will have their late fees waived — no questions asked. Finally, do not miss the children's costume parade on Halloween afternoon at four p.m.; candy will be provided by the Friends of the Library. For details and registration, visit our website or call the front desk.",
+    questions: [
+      { q: "Who will lead the book club?", choices: ["An author", "The library director", "A librarian"], answer: 0, explain: "led by author Maria Santos。" },
+      { q: "What special offer applies in October?", choices: ["Free membership", "Waived late fees", "Free candy"], answer: 1, explain: "overdue books returned during October will have their late fees waived。" },
+      { q: "What time does the costume parade start?", choices: ["Two p.m.", "Four p.m.", "Six p.m."], answer: 1, explain: "Halloween afternoon at four p.m。" }
     ]
   }
 ];
