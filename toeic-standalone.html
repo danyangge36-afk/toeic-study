@@ -163,6 +163,9 @@ details.wrong-item summary { cursor: pointer; font-size: 14px; }
   padding: 10px 16px; margin-bottom: 12px; font-size: 14px;
 }
 .timer { font-size: 18px; font-weight: 700; font-variant-numeric: tabular-nums; }
+.chart { width: 100%; height: auto; display: block; }
+.legend { display: flex; gap: 16px; flex-wrap: wrap; margin-top: 6px; font-size: 12px; color: var(--muted); }
+.legend i { display: inline-block; width: 10px; height: 10px; border-radius: 3px; margin-right: 5px; vertical-align: -1px; }
 footer { text-align: center; color: var(--muted); font-size: 12px; padding: 20px 0 8px; }
 @media (max-width: 640px) {
   .fc-word { font-size: 24px; }
@@ -2197,6 +2200,8 @@ function renderDashboard(root) {
       ${state.mockHistory.slice(-5).reverse().map((m) => `<tr><td>${m.date}</td><td>${m.kind ? (MOCK_LABEL[m.kind] || m.kind) : "—"}</td><td>${m.lC}/${m.lT}</td><td>${m.rC}/${m.rT}</td><td><b>${scoreEst(m.lC, m.lT) + scoreEst(m.rC, m.rT)}</b></td></tr>`).join("")}
     </table>` : `<p class="muted">还没有模考记录。建议每周做 1-2 次快速模考检验进度。</p>`}
   </div>
+  ${state.mockHistory.length ? `<div class="card"><h3>📈 分数曲线（估算分趋势）</h3>${scoreChartSVG()}<p class="muted">悬停圆点可查看每场详情。分数为按正确率折算的估算，趋势比单次分数更有意义。</p></div>` : ""}
+  <div class="card"><h3>🔥 最近 30 天练习量</h3>${practiceChartSVG()}<p class="muted">统计所有作答（词汇 + 题目 + 模考）。目标：每天至少点亮一根柱子。</p></div>
   <div class="card">
     <h3>⚙️ 语音设置</h3>
     <label class="lbl">朗读速度 <span id="rateVal">${state.settings.rate}</span> 倍</label>
@@ -2223,6 +2228,45 @@ function renderDashboard(root) {
   initVoices();
 }
 function scoreEst(c, t) { return t ? Math.round(c / t * 495 / 5) * 5 : 0; }
+
+/* ============ 图表（纯 SVG，无依赖） ============ */
+function scoreChartSVG() {
+  const list = state.mockHistory.slice(-20);
+  const W = 640, H = 250, pl = 42, pr = 12, pt = 16, pb = 30;
+  const y = (s) => pt + (H - pt - pb) * (1 - s / 1000);
+  const n = list.length;
+  const x = (i) => (n === 1 ? (pl + (W - pl - pr) / 2) : pl + (W - pl - pr) * i / (n - 1));
+  const pts = (key) => list.map((m, i) => x(i) + "," + y(key(m))).join(" ");
+  const grid = [0, 250, 500, 750, 1000].map((v) => `<line x1="${pl}" y1="${y(v)}" x2="${W - pr}" y2="${y(v)}" stroke="#e5e9f2"/><text x="${pl - 6}" y="${y(v) + 4}" text-anchor="end" font-size="10" fill="#9aa3b2">${v}</text>`).join("");
+  const goal = state.settings.goal ? `<line x1="${pl}" y1="${y(state.settings.goal)}" x2="${W - pr}" y2="${y(state.settings.goal)}" stroke="#dc2626" stroke-dasharray="5 4" stroke-width="1.2"/><text x="${W - pr}" y="${y(state.settings.goal) - 4}" text-anchor="end" font-size="10" fill="#dc2626">目标 ${state.settings.goal}</text>` : "";
+  const dots = list.map((m, i) => {
+    const t = scoreEst(m.lC, m.lT) + scoreEst(m.rC, m.rT);
+    const label = (MOCK_LABEL[m.kind] || "模考") + " " + t + " 分（听 " + scoreEst(m.lC, m.lT) + " / 读 " + scoreEst(m.rC, m.rT) + "）";
+    return `<circle cx="${x(i)}" cy="${y(t)}" r="4" fill="#3552e0"><title>${m.date} ${esc(label)}</title></circle>`;
+  }).join("");
+  const xlabels = list.map((m, i) => (n <= 8 || i === 0 || i === n - 1) ? `<text x="${x(i)}" y="${H - 8}" text-anchor="${i === n - 1 ? "end" : "middle"}" font-size="10" fill="#9aa3b2">${m.date.slice(5)}</text>` : "").join("");
+  return `<svg viewBox="0 0 ${W} ${H}" class="chart">${grid}${goal}
+    <polyline points="${pts((m) => scoreEst(m.lC, m.lT))}" fill="none" stroke="#60a5fa" stroke-width="1.6" opacity=".85"/>
+    <polyline points="${pts((m) => scoreEst(m.rC, m.rT))}" fill="none" stroke="#9333ea" stroke-width="1.6" opacity=".85"/>
+    <polyline points="${pts((m) => scoreEst(m.lC, m.lT) + scoreEst(m.rC, m.rT))}" fill="none" stroke="#3552e0" stroke-width="2.4"/>
+    ${dots}${xlabels}</svg>
+    <div class="legend"><span class="lg"><i style="background:#3552e0"></i>总分估算</span><span class="lg"><i style="background:#60a5fa"></i>听力</span><span class="lg"><i style="background:#9333ea"></i>阅读</span><span class="lg"><i style="background:#dc2626"></i>目标线</span></div>`;
+}
+function practiceChartSVG() {
+  const W = 640, H = 150, pl = 30, pr = 10, pt = 12, pb = 26;
+  const days = [];
+  const d = new Date(); d.setDate(d.getDate() - 29);
+  for (let i = 0; i < 30; i++) { days.push({ key: fmtDate(d), v: state.stats.days[fmtDate(d)] || 0 }); d.setDate(d.getDate() + 1); }
+  const max = Math.max(10, ...days.map((x) => x.v));
+  const bw = (W - pl - pr) / 30;
+  const bars = days.map((x, i) => {
+    const h = (H - pt - pb) * x.v / max;
+    return `<rect x="${pl + i * bw + 1.5}" y="${H - pb - h}" width="${bw - 3}" height="${h}" rx="2" fill="${x.key === todayStr() ? "#3552e0" : "#93a5f5"}"><title>${x.key}：${x.v} 题</title></rect>` +
+      ((i % 5 === 0 || i === 29) ? `<text x="${pl + i * bw + bw / 2}" y="${H - 8}" text-anchor="middle" font-size="9.5" fill="#9aa3b2">${x.key.slice(5)}</text>` : "");
+  }).join("");
+  const grid = [max, Math.round(max / 2), 0].map((v) => { const yy = H - pb - (H - pt - pb) * v / max; return `<line x1="${pl}" y1="${yy}" x2="${W - pr}" y2="${yy}" stroke="#eef1f6"/><text x="${pl - 5}" y="${yy + 4}" text-anchor="end" font-size="10" fill="#9aa3b2">${v}</text>`; }).join("");
+  return `<svg viewBox="0 0 ${W} ${H}" class="chart">${grid}${bars}</svg>`;
+}
 
 /* ============ 词汇页 ============ */
 let vocabSession = null; // {mode, list, i, correctCount}
