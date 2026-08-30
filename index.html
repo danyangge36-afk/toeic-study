@@ -166,6 +166,10 @@ details.wrong-item summary { cursor: pointer; font-size: 14px; }
 .chart { width: 100%; height: auto; display: block; }
 .legend { display: flex; gap: 16px; flex-wrap: wrap; margin-top: 6px; font-size: 12px; color: var(--muted); }
 .legend i { display: inline-block; width: 10px; height: 10px; border-radius: 3px; margin-right: 5px; vertical-align: -1px; }
+.plan-item { display: flex; gap: 9px; align-items: flex-start; padding: 7px 0; border-bottom: 1px dashed var(--line); cursor: pointer; }
+.plan-item:last-child { border-bottom: none; }
+.plan-item input { width: auto; margin-top: 4px; accent-color: var(--brand); }
+.plan-item input:checked + span { text-decoration: line-through; color: var(--muted); }
 footer { text-align: center; color: var(--muted); font-size: 12px; padding: 20px 0 8px; }
 @media (max-width: 640px) {
   .fc-word { font-size: 24px; }

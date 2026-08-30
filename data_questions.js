@@ -532,7 +532,37 @@ const P5_DATA = [
   { q: "The new policy applies ______ all part-time employees.", choices: ["for", "to", "with", "on"], answer: 1, explain: "apply to sb（适用于）固定搭配。", tag: "介词搭配" },
   { q: "Hardly ______ the office when the client called again.", choices: ["she left", "did she leave", "she had left", "does she leave"], answer: 1, explain: "hardly... when 结构 + 否定副词开头用倒装 did she leave。", tag: "倒装" },
   { q: "The brochure is available ______ English and Japanese.", choices: ["both in", "in both", "both of", "of both"], answer: 1, explain: "in both English and Japanese（可用两种语言）。", tag: "介词" },
-  { q: "We are considering ______ the launch date by a week.", choices: ["postpone", "to postpone", "postponing", "postponed"], answer: 2, explain: "consider + doing（考虑做某事），不接不定式。", tag: "动名词" }
+  { q: "We are considering ______ the launch date by a week.", choices: ["postpone", "to postpone", "postponing", "postponed"], answer: 2, explain: "consider + doing（考虑做某事），不接不定式。", tag: "动名词" },
+  { q: "The committee members proposed ______ the venue to a larger hall.", choices: ["change", "changing", "to changing", "changed"], answer: 1, explain: "propose + doing。", tag: "动名词" },
+  { q: "If I ______ you, I would accept the offer immediately.", choices: ["am", "was", "were", "be"], answer: 2, explain: "与现在事实相反的虚拟语气，be 动词一律用 were。", tag: "虚拟语气" },
+  { q: "Having ______ the deadline, the team requested an extension.", choices: ["missed", "miss", "missing", "to miss"], answer: 0, explain: "Having + 过去分词表示先于主句发生的动作。", tag: "分词" },
+  { q: "There ______ several unresolved issues in the contract.", choices: ["is", "are", "be", "has"], answer: 1, explain: "there be 句型谓语与后面的名词一致：several issues → are。", tag: "主谓一致" },
+  { q: "It is expected that the new policy ______ effect in April.", choices: ["takes", "taking", "taken", "take"], answer: 0, explain: "It is expected that + 完整句子（主语 policy 单数 → takes）。", tag: "从句" },
+  { q: "She is responsible for ______ the monthly newsletter.", choices: ["edit", "editing", "edition", "editor"], answer: 1, explain: "介词 for + 动名词。", tag: "动名词" },
+  { q: "Mr. Ito's flight arrives ______ 3:40 p.m.", choices: ["in", "on", "at", "to"], answer: 2, explain: "具体时刻用 at。", tag: "介词" },
+  { q: "Please ______ free to contact the support team anytime.", choices: ["do", "feel", "make", "get"], answer: 1, explain: "feel free to do（请随时……）固定表达。", tag: "固定短语" },
+  { q: "One of the printers ______ been out of order since Monday.", choices: ["have", "has", "are", "were"], answer: 1, explain: "one of + 复数名词作主语，谓语用单数 → has。", tag: "主谓一致" },
+  { q: "The manager made the assistants ______ the reports before the meeting.", choices: ["revise", "revising", "revised", "to revise"], answer: 0, explain: "make sb do sth（使役动词后接动词原形）。", tag: "动词形式" },
+  { q: "The invoice must be approved ______ the finance director.", choices: ["from", "with", "by", "to"], answer: 2, explain: "被动语态的施动者用 by。", tag: "被动语态" },
+  { q: "______ either of you seen the revised schedule?", choices: ["Does", "Do", "Has", "Have"], answer: 3, explain: "either of you 视作复数主语，且后接 seen → Have。", tag: "主谓一致" },
+  { q: "I have three reports to finish; please give me ______ hour.", choices: ["another", "other", "the other", "others"], answer: 0, explain: "another + 元音开头的单数名词（再给一小时）。", tag: "代词" },
+  { q: "The more you practice, ______ it becomes.", choices: ["easier", "the easier", "more easy", "easiest"], answer: 1, explain: "the + 比较级..., the + 比较级...（越……越……）。", tag: "比较级" },
+  { q: "Mr. Rossi used to ______ in Milan before moving to Tokyo.", choices: ["live", "living", "lives", "lived"], answer: 0, explain: "used to + 动词原形（过去常常）。", tag: "动词形式" },
+  { q: "She is not used to ______ presentations in English.", choices: ["give", "giving", "gave", "be given"], answer: 1, explain: "be used to + doing（习惯于），与 used to do 区分。高频对比考点！", tag: "动名词" },
+  { q: "The shipment was delayed, ______ the delivery deadline was extended.", choices: ["so", "because", "despite", "in spite"], answer: 0, explain: "so 表结果（因此）。", tag: "连词" },
+  { q: "We scheduled the meeting early ______ everyone could attend before lunch.", choices: ["so that", "in case", "even though", "whereas"], answer: 0, explain: "so that + 从句表目的（以便）。", tag: "连词" },
+  { q: "The report covers ______ the domestic and overseas markets.", choices: ["either", "both", "neither", "all"], answer: 1, explain: "both A and B（两者都）。", tag: "代词" },
+  { q: "A number of employees ______ requested remote work options.", choices: ["has", "have", "is", "was"], answer: 1, explain: "a number of + 复数 → have（对比：the number of + 单数）。高频对比考点！", tag: "主谓一致" },
+  { q: "The hotel room was spacious, ______ the view was disappointing.", choices: ["so", "but", "or", "for"], answer: 1, explain: "前后语义转折 → but。", tag: "连词" },
+  { q: "Candidates are advised to arrive ______ for the interview.", choices: ["promptly", "prompt", "promptness", "prompter"], answer: 0, explain: "修饰动词 arrive 用副词。", tag: "词性" },
+  { q: "The software update is available ______ download on the intranet.", choices: ["to", "for", "with", "at"], answer: 1, explain: "available for download 固定搭配。", tag: "介词搭配" },
+  { q: "We had the brochure ______ into three languages.", choices: ["translate", "translated", "translating", "to translate"], answer: 1, explain: "have sth done（让别人做某事），使役 + 过去分词。", tag: "动词形式" },
+  { q: "______ the rain, the outdoor market was crowded.", choices: ["Despite of", "In spite", "Despite", "Although"], answer: 2, explain: "Despite + 名词；没有 despite of；In spite of 才正确。", tag: "连词" },
+  { q: "Mr. Bauer will ______ be attending the expo this year.", choices: ["no", "not", "none", "nothing"], answer: 1, explain: "will not be attending（将不会出席）。", tag: "词性" },
+  { q: "The consultant suggested that we ______ the timeline.", choices: ["shorten", "shortened", "shortening", "to shorten"], answer: 0, explain: "suggest that + 主语 + 动词原形（虚拟语气）。进阶考点。", tag: "虚拟语气" },
+  { q: "Unfortunately, we made ______ progress this quarter.", choices: ["a little", "little", "a few", "few"], answer: 1, explain: "progress 不可数；little 表否定（几乎没有），a little 表肯定。", tag: "数量词" },
+  { q: "Please send the confirmation to my colleague ______ me.", choices: ["instead", "instead of", "rather", "than"], answer: 1, explain: "instead of + 名词（而不是我）。", tag: "介词搭配" },
+  { q: "The auditor found the records ______ in order.", choices: ["be", "been", "to be", "being"], answer: 2, explain: "find sth to be + 形容词（发现……处于……状态）。", tag: "不定式" }
 ];
 
 /* ============ 阅读 Part 6 长文填空（每篇 4 空） ============ */
@@ -885,6 +915,58 @@ const P7_DATA = [
       { q: "What will participants who attend all sessions receive?", choices: ["A workbook", "A certificate", "A refund"], answer: 1, explain: "A certificate of completion... who attend all three sessions。" },
       { q: "Why does Ms. Takeda pay 9,600 yen?", choices: ["She registered early", "She is a member of the association", "She attends online only"], answer: 1, explain: "As a member..., you received the member rate。" },
       { q: "What will Ms. Takeda receive on November 10?", choices: ["Her workbook", "Her certificate", "Online course access"], answer: 2, explain: "course access begins on November 10（workbook 当天在会场发）。" }
+    ]
+  },
+  {
+    title: "双篇 · 食品出口展参展咨询", type: "AD + E-MAIL", double: true,
+    passages: [
+      "[ADVERTISEMENT]\nFood Export Fair — September 24-26, Makuhari Messe\n\nOver 400 exhibitors from 30 countries. New this year: a dedicated organic-products pavilion and one-on-one buyer matchmaking sessions (advance registration required). Tickets: 3,000 yen (day pass); 7,000 yen (three-day pass, includes the fair catalog). Free shuttle buses run from Kaihin-Makuhari Station every ten minutes. Exhibitor applications close June 30, and early-bird booth discounts of 10 percent apply to applications received before April 30.",
+      "[E-MAIL]\nFrom: purchasing@suzumo.co.jp\nTo: fair@exportex.jp\nSubject: Booth and matchmaking\n\nHello,\n\nOur company would like to exhibit, as we did last year. Two questions: First, if we book our booth before May 10, do we get the early-bird discount? Second, for the buyer matchmaking sessions, should our sales staff register individually, or can I register all four of them at once? Also, please send the exhibitor brochure to the address below.\n\nBest regards,\nY. Shimizu, Suzumo Co., Ltd."
+    ],
+    questions: [
+      { q: "What is new at this year's fair?", choices: ["The organic-products pavilion", "The free shuttle buses", "The reduced day-pass price"], answer: 0, explain: "New this year: a dedicated organic-products pavilion。" },
+      { q: "Who receives a booth discount?", choices: ["Those applying before April 30", "Those booking before May 10", "Last year's exhibitors"], answer: 0, explain: "early-bird discounts apply to applications received before April 30（5 月 10 日是 Mr. Shimizu 的误解）。" },
+      { q: "What does Mr. Shimizu ask about the matchmaking sessions?", choices: ["The fee", "Group registration", "The session times"], answer: 1, explain: "should our sales staff register individually, or can I register all four at once?" },
+      { q: "What does Mr. Shimizu request be sent?", choices: ["Tickets", "The exhibitor brochure", "A shuttle timetable"], answer: 1, explain: "please send the exhibitor brochure to the address below。" }
+    ]
+  },
+  {
+    title: "双篇 · 考勤系统上线", type: "NOTICE + E-MAIL", double: true,
+    passages: [
+      "[NOTICE]\nNew Attendance System Launch\n\nFrom Monday, May 12, the paper timesheet will be replaced by the SmartClock app. All staff must install the app on their company phones and register their employee ID by May 9. Clock-in and clock-out records will sync automatically; manual corrections must be requested through a supervisor within three business days. During the first two weeks, the HR team will hold drop-in help sessions every afternoon in room 202. Printed guides are available at the reception desk.",
+      "[E-MAIL]\nFrom: k.nakagawa@brightwave.co.jp\nTo: HR Department\nSubject: SmartClock question\n\nDear HR team,\n\nI will be at the Osaka plant from May 12 to May 16 on a business trip. Should I still clock in through the app while I am away? Also, my company phone is being repaired, and I will not get it back before May 9. Can I register later without missing the deadline? I can attend a help session on May 13 if that would help.\n\nBest regards,\nK. Nakagawa"
+    ],
+    questions: [
+      { q: "What is the purpose of the notice?", choices: ["To announce a new attendance system", "To cancel the help sessions", "To recruit new supervisors"], answer: 0, explain: "the paper timesheet will be replaced by the SmartClock app。" },
+      { q: "What must staff do by May 9?", choices: ["Install the app and register their ID", "Return their paper timesheets", "Attend a help session"], answer: 0, explain: "install the app... and register their employee ID by May 9。" },
+      { q: "What problem does Mr. Nakagawa have?", choices: ["His company phone is under repair", "His business trip was canceled", "The app does not sync"], answer: 0, explain: "my company phone is being repaired。" },
+      { q: "What does Mr. Nakagawa offer to do?", choices: ["Attend a help session on May 13", "Skip clocking in Osaka", "Buy his own phone"], answer: 0, explain: "I can attend a help session on May 13。" }
+    ]
+  },
+  {
+    title: "双篇 · 公寓出租咨询", type: "AD + E-MAIL", double: true,
+    passages: [
+      "[ADVERTISEMENT]\nRiverside Apartments — Now Leasing\n\nOne- and two-bedroom units available from June 1. Rent from 98,000 yen; a two-month deposit is required. All units include a kitchen unit, air conditioning, and high-speed fiber internet (monthly fee 1,500 yen). The building is a seven-minute walk from Higashi Station and has secure bicycle parking. English-speaking staff are available for weekend viewings. Pet-friendly units are limited to the third floor.",
+      "[E-MAIL]\nFrom: s.moore@mailbox.com\nTo: Riverside Apartments\nSubject: Viewing request\n\nHello,\n\nI am interested in a one-bedroom unit starting June 1. I have two questions: First, is the internet fee included in the rent, or is it paid separately? Second, I have a small cat — are pets allowed in every unit? I can visit on Saturday afternoon for a viewing if English-speaking staff will be available.\n\nThank you,\nS. Moore"
+    ],
+    questions: [
+      { q: "What is being advertised?", choices: ["Apartments for rent", "Office space for companies", "A furniture sale"], answer: 0, explain: "Riverside Apartments — Now Leasing。" },
+      { q: "How much is the deposit?", choices: ["One month's rent", "Two months' rent", "98,000 yen in total"], answer: 1, explain: "a two-month deposit is required。" },
+      { q: "What does Ms. Moore ask about pets?", choices: ["Whether every unit allows them", "Whether a pet deposit is needed", "Whether only cats are allowed"], answer: 0, explain: "are pets allowed in every unit?（广告说仅限三楼，所以答案是否定的）。" },
+      { q: "When does Ms. Moore want to visit?", choices: ["Saturday afternoon", "On June 1", "On a weekday"], answer: 0, explain: "I can visit on Saturday afternoon。" }
+    ]
+  },
+  {
+    title: "双篇 · 夏日祭延期与退票", type: "NOTICE + E-MAIL", double: true,
+    passages: [
+      "[NOTICE]\nRiverside Summer Festival — Postponement\n\nDue to the typhoon approaching the Kanto region, the festival scheduled for Saturday, August 22 has been postponed to Saturday, September 5. All advance tickets will be valid on the new date; visitors who cannot attend may request a full refund through the ticket website by August 31. Vendor booths will keep their assigned locations. The fireworks display, however, has been canceled outright and will not be rescheduled, for safety reasons.",
+      "[E-MAIL]\nFrom: t.yamane@mail.ne.jp\nTo: Festival office\nSubject: Tickets and events\n\nHello,\n\nI bought two advance tickets (order 55210) for the festival. I can attend on the new date, September 5, so I do not need a refund. However, my mother especially wanted to see the fireworks. Since the display is canceled, could you tell me whether any other performances are planned for September 5 to replace it? Also, please confirm that the children's craft corner will still run.\n\nBest regards,\nT. Yamane"
+    ],
+    questions: [
+      { q: "Why was the festival postponed?", choices: ["A typhoon is approaching", "The venue was double-booked", "Too few vendors applied"], answer: 0, explain: "Due to the typhoon approaching the Kanto region。" },
+      { q: "By what date can ticket holders request a refund?", choices: ["August 22", "August 31", "September 5"], answer: 1, explain: "request a full refund... by August 31。" },
+      { q: "What did Mr. Yamane decide?", choices: ["To attend on the new date", "To request a full refund", "To sell his tickets"], answer: 0, explain: "I can attend on the new date... so I do not need a refund。" },
+      { q: "What does Mr. Yamane ask to confirm?", choices: ["That the craft corner will run", "The new fireworks schedule", "His booth location"], answer: 0, explain: "please confirm that the children's craft corner will still run。" }
     ]
   }
 ];

@@ -14,11 +14,12 @@ const LETTERS = ["A", "B", "C", "D"];
 /* ============ 状态与存储 ============ */
 const STORE_KEY = "toeic_app_v1";
 let state = {
-  settings: { rate: 0.95, voiceURI: "", examDate: "", goal: 730 },
+  settings: { rate: 0.95, voiceURI: "", examDate: "", goal: 730, autoSpeak: true },
   stats: { answered: 0, correct: 0, days: {} },
   vocab: {},            // "catId:idx" -> {box, ts}
   wrongbook: [],        // {pool, idx, qIdx, ts}
-  mockHistory: []
+  mockHistory: [],
+  planChecks: {}        // 30 天计划勾选 "w周t任务" -> true
 };
 function saveState() {
   try { localStorage.setItem(STORE_KEY, JSON.stringify(state)); } catch (e) { /* file:// 或隐私模式 */ }
@@ -204,6 +205,7 @@ function renderDashboard(root) {
     <input type="range" id="rateRange" min="0.6" max="1.2" step="0.05" value="${state.settings.rate}">
     <label class="lbl">英语语音</label>
     <select id="voiceSelect"></select>
+    <label class="lbl" style="display:flex;align-items:center;gap:8px;margin-top:10px"><input type="checkbox" id="autoSpeakChk" style="width:auto" ${state.settings.autoSpeak !== false ? "checked" : ""}> 进入词汇卡片时自动朗读单词</label>
     <p class="muted">听力练习使用浏览器自带语音合成（TTS）朗读，无需音频文件。建议选用 en-US 英式/美式人声。</p>
     <button class="btn" id="testSpeakBtn">试听：TOEIC test, Part Three. Listen to the conversation.</button>
     <button class="btn danger" id="resetBtn" style="margin-left:8px">清空全部学习数据</button>
@@ -216,6 +218,7 @@ function renderDashboard(root) {
   $("#goalSel").addEventListener("change", (e) => { state.settings.goal = +e.target.value; saveState(); renderDashboard(root); });
   $("#rateRange").addEventListener("input", (e) => { state.settings.rate = +e.target.value; $("#rateVal").textContent = e.target.value; saveState(); });
   $("#voiceSelect").addEventListener("change", (e) => { state.settings.voiceURI = e.target.value; saveState(); });
+  $("#autoSpeakChk").addEventListener("change", (e) => { state.settings.autoSpeak = e.target.checked; saveState(); });
   $("#testSpeakBtn").addEventListener("click", () => speakList([{ text: "TOEIC test, Part Three. Listen to the conversation. Then, choose the best answer to each question." }]));
   $("#resetBtn").addEventListener("click", () => {
     if (confirm("确定清空所有学习记录吗？此操作不可恢复。")) { state = { settings: state.settings, stats: { answered: 0, correct: 0, days: {} }, vocab: {}, wrongbook: [], mockHistory: [] }; saveState(); renderDashboard(root); }
@@ -306,6 +309,7 @@ function nextVocabCard() {
   }
   const item = sess.list[sess.i];
   const catName = item.cat.name;
+  const autoS = state.settings.autoSpeak !== false;
   if (sess.mode === "learn") {
     area.innerHTML = `
     <div class="card flashcard">
@@ -321,6 +325,7 @@ function nextVocabCard() {
         <button class="btn bad" id="fcNo" disabled>😥 没记住</button>
       </div>
     </div>`;
+    if (autoS) setTimeout(() => speakList([{ text: item.w.w }]), 350);
     $("#fcSpeak").addEventListener("click", () => speakList([{ text: item.w.w }]));
     $("#fcShow").addEventListener("click", () => { $("#fcMeaning").style.visibility = "visible"; $("#fcShow").disabled = true; $("#fcYes").disabled = false; $("#fcNo").disabled = false; speakList([{ text: item.w.w + ". " + item.w.ex }]); });
     $("#fcYes").addEventListener("click", () => { updateVocab(item.cat.id, item.i, true); sess.correct++; sess.i++; nextVocabCard(); });
@@ -337,11 +342,13 @@ function nextVocabCard() {
       <button class="btn" id="qNext" style="display:none">下一题 →</button>
     </div>`;
     $("#qSpeak").addEventListener("click", () => speakList([{ text: item.w.w }]));
+    if (autoS) setTimeout(() => speakList([{ text: item.w.w }]), 350);
     $$("#qOpts .opt").forEach((b) => b.addEventListener("click", () => {
       const ok = b.dataset.ok === "1";
       $$("#qOpts .opt").forEach((x, k) => { x.disabled = true; if (x.dataset.ok === "1") x.classList.add("correct"); });
       if (!ok) b.classList.add("wrong"); else sess.correct++;
-      $("#qFeed").innerHTML = `<div class="explain"><b>${esc(item.w.zh)}</b><br>${esc(item.w.ex)}</div>`;
+      $("#qFeed").innerHTML = `<div class="explain"><b>${esc(item.w.zh)}</b><br>${esc(item.w.ex)}</div><button class="btn sm" id="qfSpeak">🔊 听例句</button>`;
+      $("#qfSpeak").addEventListener("click", () => speakList([{ text: item.w.ex }]));
       $("#qNext").style.display = "inline-block";
       updateVocab(item.cat.id, item.i, ok);
     }));
@@ -450,9 +457,9 @@ function answerChoice(pool, idx, qIdx, choice, btn, choicesSel, feedSel, onDone)
 /* ============ 阅读页 ============ */
 let readSession = null;
 const READ_PARTS = [
-  ["p5", "Part 5 · 短文填空", "50 题", "语法与词汇，目标 20-30 秒/题"],
+  ["p5", "Part 5 · 短文填空", "80 题", "语法与词汇，目标 20-30 秒/题"],
   ["p6", "Part 6 · 长文填空", "10 篇 × 4 空", "结合上下文选词"],
-  ["p7", "Part 7 · 阅读理解", "10 单篇 + 6 双篇", "先读题干再回原文定位"]
+  ["p7", "Part 7 · 阅读理解", "10 单篇 + 10 双篇", "先读题干再回原文定位"]
 ];
 function renderReading(root) {
   root.innerHTML = `
@@ -525,7 +532,7 @@ function renderMock(root) {
   root.innerHTML = `
   <div class="page-head"><h1>⏱️ 模拟考试</h1><p class="muted">从题库随机抽题组卷，严格计时。成绩为按比例折算的<b>估算分</b>，仅供参考趋势。</p></div>
   <div class="grid grid-2">
-    <div class="card" style="border-color:var(--brand)"><h3>🏆 全真模考</h3><p>听力 97 题（P1×6 / P2×25 / P3 全部 / P4 全部）+ 阅读 100 题（P5×30 / P6×4 篇 / P7 单双篇全量）<br><b>限时 120 分钟</b>（真实考试 45+75 节奏，听转读时有提示）</p><button class="btn big" data-m="full">开始</button></div>
+    <div class="card" style="border-color:var(--brand)"><h3>🏆 全真模考</h3><p>听力 97 题（P1×6 / P2×25 / P3 全部 / P4 全部）+ 阅读 100 题（P5×30 / P6×4 篇 / P7 单篇全量 + 双篇精选 6 组）<br><b>限时 120 分钟</b>（真实考试 45+75 节奏，听转读时有提示）</p><button class="btn big" data-m="full">开始</button></div>
     <div class="card"><h3>🎯 快速模考</h3><p>听力 22 题 + 阅读 26 题<br>限时 45 分钟</p><button class="btn big" data-m="quick">开始</button></div>
     <div class="card"><h3>🎧 听力专项</h3><p>Part 1-4 共 22 题<br>限时 25 分钟</p><button class="btn big" data-m="listen">开始</button></div>
     <div class="card"><h3>📖 阅读专项</h3><p>Part 5-7 共 26 题<br>限时 30 分钟</p><button class="btn big" data-m="read">开始</button></div>
@@ -541,7 +548,7 @@ function buildMockItems(kind) {
       ALL_POOLS.p3.map((_, i) => ({ pool: "p3", idx: i })), ALL_POOLS.p4.map((_, i) => ({ pool: "p4", idx: i })));
     const singles = ALL_POOLS.p7.map((d, i) => ({ pool: "p7", idx: i })).filter((x) => !ALL_POOLS.p7[x.idx].double);
     const doubles = ALL_POOLS.p7.map((d, i) => ({ pool: "p7", idx: i })).filter((x) => ALL_POOLS.p7[x.idx].double);
-    R = [].concat(pick("p5", Math.min(30, ALL_POOLS.p5.length)), shuffle(ALL_POOLS.p6.map((_, i) => ({ pool: "p6", idx: i }))).slice(0, 4), shuffle(singles), shuffle(doubles));
+    R = [].concat(pick("p5", Math.min(30, ALL_POOLS.p5.length)), shuffle(ALL_POOLS.p6.map((_, i) => ({ pool: "p6", idx: i }))).slice(0, 4), shuffle(singles), shuffle(doubles).slice(0, 6));
     return { L: L, R: R, minutes: 120 };
   }
   if (kind !== "read") { L = [].concat(pick("p1", 2), pick("p2", 8), pick("p3", 2), pick("p4", 2)); }
@@ -732,6 +739,16 @@ function renderWrongPractice(root) {
 }
 
 /* ============ 备考指南 ============ */
+function updatePlanProgress() {
+  let total = 0, done = 0;
+  STUDY_PLAN.forEach((w, wi) => {
+    const d = w.tasks.filter((t, ti) => state.planChecks["w" + wi + "t" + ti]).length;
+    done += d; total += w.tasks.length;
+    const el = $("#wc" + wi); if (el) el.textContent = " · 已完成 " + d + "/" + w.tasks.length;
+  });
+  const pt = $("#planTotal"); if (pt) pt.textContent = done + " / " + total + " 项";
+  const pb = $("#planBar"); if (pb) pb.style.width = Math.round(done / total * 100) + "%";
+}
 function renderGuide(root) {
   const E = EXAM_STRUCTURE;
   root.innerHTML = `
@@ -762,14 +779,26 @@ function renderGuide(root) {
     ${STRATEGIES.map((s) => `<details class="strategy"><summary>${s.icon} ${s.part}</summary><ul>${s.points.map((p) => "<li>" + p + "</li>").join("")}</ul></details>`).join("")}
   </div>
 
-  <div class="card"><h3>🗓️ 30 天冲刺计划</h3>
-    ${STUDY_PLAN.map((w) => `<details class="strategy" ${w.week.startsWith("第 1") ? "open" : ""}><summary>${w.week}（${w.days}）</summary><ul>${w.tasks.map((t) => "<li>" + t + "</li>").join("")}</ul></details>`).join("")}
+  <div class="card"><h3>🗓️ 30 天冲刺计划（勾选打卡）</h3>
+    <div class="stat-row"><span>总进度</span><b id="planTotal"></b></div>
+    <div class="progress" style="margin:8px 0 10px"><div id="planBar" style="width:0%"></div></div>
+    ${STUDY_PLAN.map((w, wi) => {
+    const done = w.tasks.filter((t, ti) => state.planChecks["w" + wi + "t" + ti]).length;
+    return `<details class="strategy" ${wi === 0 ? "open" : ""}><summary><b>${w.week}</b>（${w.days}）<span class="muted" id="wc${wi}"> · 已完成 ${done}/${w.tasks.length}</span></summary>
+      <div>${w.tasks.map((t, ti) => `<label class="plan-item"><input type="checkbox" data-k="w${wi}t${ti}" ${state.planChecks["w" + wi + "t" + ti] ? "checked" : ""}><span>${esc(t)}</span></label>`).join("")}</div></details>`;
+  }).join("")}
   </div>
 
   <div class="card"><h3>🔗 精选备考资源</h3>
     ${RESOURCES.map((c) => `<h4>${c.icon} ${c.cat}</h4><ul class="res-list">${c.items.map((it) => `<li><a href="${it.url}" target="_blank" rel="noopener">${esc(it.name)}</a><br><span class="muted">${esc(it.desc)}</span></li>`).join("")}</ul>`).join("")}
     <p class="muted">提示：链接在浏览器中打开；日本官方教材可在 Amazon.co.jp 或纪伊国屋购买，二手书也非常划算。</p>
   </div>`;
+  updatePlanProgress();
+  $$("input[data-k]", root).forEach((cb) => cb.addEventListener("change", (e) => {
+    const k = e.target.dataset.k;
+    if (e.target.checked) state.planChecks[k] = true; else delete state.planChecks[k];
+    saveState(); updatePlanProgress();
+  }));
 }
 
 /* ============ 启动 ============ */
