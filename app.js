@@ -311,10 +311,10 @@ function nextVocabCard() {
 /* ============ 听力页 ============ */
 let listenSession = null;
 const LISTEN_PARTS = [
-  ["p1", "Part 1 · 照片描述", "6 题", "听 4 句描述选最符合的"],
-  ["p2", "Part 2 · 应答", "20 题", "听问题选最佳回应（3 选 1）"],
-  ["p3", "Part 3 · 对话", "8 组 × 3 题", "先读题再听对话"],
-  ["p4", "Part 4 · 短文", "6 篇 × 3 题", "广播、留言、广告等独白"]
+  ["p1", "Part 1 · 照片描述", "12 题", "听 4 句描述选最符合的"],
+  ["p2", "Part 2 · 应答", "40 题", "听问题选最佳回应（3 选 1）"],
+  ["p3", "Part 3 · 对话", "12 组 × 3 题", "先读题再听对话"],
+  ["p4", "Part 4 · 短文", "10 篇 × 3 题", "广播、留言、广告等独白"]
 ];
 function renderListening(root) {
   root.innerHTML = `
@@ -409,9 +409,9 @@ function answerChoice(pool, idx, qIdx, choice, btn, choicesSel, feedSel, onDone)
 /* ============ 阅读页 ============ */
 let readSession = null;
 const READ_PARTS = [
-  ["p5", "Part 5 · 短文填空", "30 题", "语法与词汇，目标 20-30 秒/题"],
-  ["p6", "Part 6 · 长文填空", "4 篇 × 4 空", "结合上下文选词"],
-  ["p7", "Part 7 · 阅读理解", "5 单篇 + 2 双篇", "先读题干再回原文定位"]
+  ["p5", "Part 5 · 短文填空", "50 题", "语法与词汇，目标 20-30 秒/题"],
+  ["p6", "Part 6 · 长文填空", "8 篇 × 4 空", "结合上下文选词"],
+  ["p7", "Part 7 · 阅读理解", "8 单篇 + 3 双篇", "先读题干再回原文定位"]
 ];
 function renderReading(root) {
   root.innerHTML = `
@@ -694,6 +694,11 @@ function renderGuide(root) {
 
   <div class="card"><h3>🇯🇵 日本报考信息</h3>
     <table class="tbl">${JAPAN_INFO.map((r) => `<tr><th style="width:90px">${r.k}</th><td>${r.v}</td></tr>`).join("")}</table>
+  </div>
+
+  <div class="card"><h3>🎯 Part 5 语法考点速查（做题前扫一遍）</h3>
+    <table class="tbl"><tr><th style="width:120px">考点</th><th>判断方法</th><th style="width:230px">示例</th></tr>
+    ${GRAMMAR_CHEATSHEET.map((g) => `<tr><td><b>${g.point}</b></td><td>${g.signal}</td><td class="tip-cell">${g.demo}</td></tr>`).join("")}</table>
   </div>
 
   <div class="card"><h3>🏆 各 Part 高分策略</h3>

@@ -69,6 +69,72 @@ const P1_DATA = [
     ],
     answer: 2,
     explain: "jog along the path（沿小路慢跑）。P1 干扰项常把地点或动作换掉：swimming / sleeping 均与照片不符。"
+  },
+  {
+    scene: "咖啡店里，一名服务员端着放有饮料的托盘走向窗边的餐桌。",
+    choices: [
+      "The server is carrying a tray of drinks.",
+      "The customers are washing dishes.",
+      "The menu is being rewritten.",
+      "The chairs are stacked on the tables."
+    ],
+    answer: 0,
+    explain: "carry a tray（端托盘）是核心动作；洗碗、收椅子都是员工打烊时才做的事。"
+  },
+  {
+    scene: "图书馆里，一名男子坐在电脑前打字，桌上堆着几本书。",
+    choices: [
+      "The man is shelving the books.",
+      "A man is typing on a computer.",
+      "The library is closed for the day.",
+      "The woman is borrowing a laptop."
+    ],
+    answer: 1,
+    explain: "照片核心动作是 typing（打字）；shelving（上架）是图书馆员的动作，用来引诱。"
+  },
+  {
+    scene: "街道上，一名邮递员正把一叠信件投进路边的邮筒。",
+    choices: [
+      "The mail carrier is delivering a package indoors.",
+      "Pedestrians are crossing the street in a line.",
+      "The mailbox is being emptied by a worker.",
+      "A postal worker is placing letters into a mailbox."
+    ],
+    answer: 3,
+    explain: "投信是 placing letters into a mailbox；C 的 emptied（清空邮筒）动作方向相反，是最强干扰。"
+  },
+  {
+    scene: "超市里，一名女子踮脚伸手从高层货架上拿一个罐头。",
+    choices: [
+      "The woman is paying at the register.",
+      "A woman is reaching for a can on the shelf.",
+      "The store clerk is mopping the floor.",
+      "The shopping carts are parked outside."
+    ],
+    answer: 1,
+    explain: "reach for（伸手去拿）是本图核心动作；paying 发生在收银台。"
+  },
+  {
+    scene: "工厂车间里，两名穿着工作服的工人正在操作一台大型机器。",
+    choices: [
+      "The workers are operating machinery.",
+      "The machines are being sold at auction.",
+      "The engineers are drawing blueprints.",
+      "The factory is under construction."
+    ],
+    answer: 0,
+    explain: "operate machinery（操作机器）。注意 machine 相关干扰：出售、画图纸、建厂房都不符。"
+  },
+  {
+    scene: "办公室里，几名员工围在白板前开会，其中一人正用笔在白板上写字。",
+    choices: [
+      "The employees are leaving the office.",
+      "The manager is writing on a whiteboard.",
+      "The staff are having a meal together.",
+      "The presentation has just ended."
+    ],
+    answer: 1,
+    explain: "write on a whiteboard 对应图中写字动作；围在白板前 ≠ 吃饭或离开。"
   }
 ];
 
@@ -93,7 +159,27 @@ const P2_DATA = [
   { q: "Which elevator goes to the lobby?", choices: ["The one on the left.", "To the first floor.", "Every ten minutes."], answer: 0, explain: "Which 问哪一个 → 指别。B 看似合理但没指出是哪部电梯。" },
   { q: "How much does membership cost?", choices: ["Once a year.", "Ninety dollars a year.", "With a credit card."], answer: 1, explain: "How much 问价格 → 选金额。A 回答 How often，C 回答支付方式。" },
   { q: "Let's take a break before the next session.", choices: ["Good idea, I need some fresh air.", "The session starts at noon.", "I already took the train."], answer: 0, explain: "陈述+建议（Let's...）→ 用同意/评价回应，而不是答非所问。" },
-  { q: "Should we take the highway or the local road?", choices: ["It is two kilometers away.", "The highway is faster at this hour.", "We took a taxi last time."], answer: 1, explain: "选择疑问句 → 在两者中给出建议并说理由。" }
+  { q: "Should we take the highway or the local road?", choices: ["It is two kilometers away.", "The highway is faster at this hour.", "We took a taxi last time."], answer: 1, explain: "选择疑问句 → 在两者中给出建议并说理由。" },
+  { q: "How often is the department meeting held?", choices: ["Once a month.", "In the meeting room.", "Yes, every department."], answer: 0, explain: "How often 问频率 → 频率短语。C 用 Yes 回答了非 Yes/No 问题。" },
+  { q: "Whose laptop is this?", choices: ["On the desk.", "It belongs to Mr. Park.", "A brand new model."], answer: 1, explain: "Whose 问归属 → belongs to sb。A 回答 Where，C 回答 What kind。" },
+  { q: "Would you mind if I opened the window?", choices: ["Not at all, go ahead.", "Yes, the window is open.", "The office is very cold."], answer: 0, explain: "Would you mind 的礼貌回应：不介意 → Not at all, go ahead。" },
+  { q: "What do you do at the company?", choices: ["I work in product development.", "At nine every morning.", "The headquarters building."], answer: 0, explain: "What do you do 问职业/职责 → 部门或职责。" },
+  { q: "Aren't you attending the award ceremony?", choices: ["The award ceremony is held annually.", "Yes, he attended it last year.", "I am, but I'll arrive a little late."], answer: 2, explain: "否定疑问句：回答先表态（I am），再补充信息，不要被 Aren't 带偏。" },
+  { q: "When is the deadline for applications?", choices: ["At the reception desk.", "By the last day of June.", "It took two weeks."], answer: 1, explain: "When 问时间 → by + 日期（截止）。A 回答 Where。" },
+  { q: "Can you tell me where the archive room is?", choices: ["It's down the hall, next to the stairs.", "Yes, the archive is very important.", "I told you where it was yesterday."], answer: 0, explain: "嵌入式疑问句（Can you tell me where...）回答的是内嵌的 where 问题 → 地点。" },
+  { q: "Who should I contact about the invoice error?", choices: ["The invoice total is incorrect.", "Last Wednesday afternoon.", "Try the billing department."], answer: 2, explain: "Who 问联系人 → 部门/人。A 只重复了问题内容。" },
+  { q: "Why don't we order lunch from the deli?", choices: ["Good idea, I'm starving.", "The deli is on Main Street.", "He ordered a sandwich."], answer: 0, explain: "Why don't we...? 是建议 → 用 Good idea 回应。" },
+  { q: "Is this seat taken?", choices: ["No, go right ahead.", "Yes, I often take the train.", "The meeting starts at noon."], answer: 0, explain: "Is this seat taken?（有人坐吗）→ No, go ahead（没人，请坐）。" },
+  { q: "How many people signed up for the workshop?", choices: ["In Room 204.", "Around forty so far.", "The workshop fee is fifty dollars."], answer: 1, explain: "How many 问数量 → 数字短语。" },
+  { q: "That new intern is doing a great job, isn't he?", choices: ["He started last month.", "The internship ends in August.", "He certainly is."], answer: 2, explain: "反意疑问句（isn't he?）→ 用 Yes/同意回应：He certainly is。" },
+  { q: "Where can I get a copy of the annual report?", choices: ["It was printed in color.", "From the admin office.", "Three copies were made."], answer: 1, explain: "Where → 领取地点。C 答非所问（多少份不是在哪拿）。" },
+  { q: "Do you know if the parking garage is open on Sundays?", choices: ["I believe it is, until six p.m.", "Yes, I parked there on Sunday.", "The garage has three levels."], answer: 0, explain: "Do you know if...? 回答给信息（开放到几点），不用只回 Yes。" },
+  { q: "What's the weather like out there?", choices: ["I like sunny weather best.", "It's starting to rain.", "Just outside the building."], answer: 1, explain: "What's the weather like 问天气现状 → 描述天气。" },
+  { q: "Could you give me a hand with these boxes?", choices: ["Sure, where do you want them?", "My hands are full right now.", "The boxes arrived this morning."], answer: 0, explain: "give me a hand = 帮忙 → 接受并追问细节。" },
+  { q: "How long have you worked here?", choices: ["From Monday to Friday.", "At the Osaka branch.", "About three years now."], answer: 2, explain: "How long + 现在完成时 → 时间段。" },
+  { q: "The elevator is out of order again.", choices: ["It stops on every floor.", "Then let's take the stairs.", "Yes, I took the elevator up."], answer: 1, explain: "陈述句（坏消息）→ 合理回应：那就走楼梯。" },
+  { q: "Which of these two designs do you prefer?", choices: ["The one with the blue background.", "I prefer designing to painting.", "Both designers joined last year."], answer: 0, explain: "Which + 范围 → 指出其中一个。" },
+  { q: "Sorry to interrupt, but you have a phone call.", choices: ["The phone rang twice.", "He interrupted the meeting.", "Thanks, I'll take it in my office."], answer: 2, explain: "通知来电 → 感谢并说明去哪接听。" }
 ];
 
 /* ============ 听力 Part 3 对话（每组 3 题） ============ */
@@ -224,6 +310,70 @@ const P3_DATA = [
       { q: "What does the man say about the refund?", choices: ["It requires a receipt", "It takes five business days", "It is only for members"], answer: 1, explain: "within five business days 回到卡内。" },
       { q: "What will the woman receive by e-mail?", choices: ["A discount coupon", "A confirmation message", "A shipping label"], answer: 1, explain: "a confirmation e-mail once it is processed。" }
     ]
+  },
+  {
+    title: "对话 9 · 差旅报销",
+    script: [
+      "W: Mr. Suzuki, I noticed your travel expenses from the Tokyo trip have not been submitted yet.",
+      "M: Oh, right. I kept all the receipts, but I am not sure which form to use.",
+      "W: Use the new online system. The paper forms were discontinued last month. Just scan the receipts and attach them.",
+      "M: I see. Is there a deadline for this month's cycle?",
+      "W: Submissions close on the twenty-fifth, and reimbursement takes about two weeks after that.",
+      "M: Then I will do it today. The hotel receipt is in my other jacket, though."
+    ],
+    questions: [
+      { q: "What does the woman say changed last month?", choices: ["The reimbursement deadline", "The expense reporting system", "The travel policy"], answer: 1, explain: "paper forms were discontinued, 改用 online system。" },
+      { q: "When does Mr. Suzuki need to submit by?", choices: ["The twenty-fifth", "In two weeks", "Today at noon"], answer: 0, explain: "Submissions close on the twenty-fifth。two weeks 是报销到账时间。" },
+      { q: "What does the man say he cannot find?", choices: ["His credit card", "The hotel receipt", "The online form"], answer: 1, explain: "The hotel receipt is in my other jacket。" }
+    ]
+  },
+  {
+    title: "对话 10 · 寄重要文件",
+    script: [
+      "M: Good morning. I would like to send this package to our Osaka office.",
+      "W: Sure. Regular mail takes three days; express arrives tomorrow morning.",
+      "M: Tomorrow, please. It contains contract originals, so it is urgent.",
+      "W: Then I would recommend adding insurance. It costs six hundred yen for documents valued up to one hundred thousand yen.",
+      "M: Yes, let's do that. Do you need me to fill out a form?",
+      "W: Just this slip with the recipient's address and your extension number."
+    ],
+    questions: [
+      { q: "Why does the man choose express delivery?", choices: ["Regular mail costs more", "The package contains urgent documents", "He is leaving for Osaka"], answer: 1, explain: "It contains contract originals, so it is urgent。" },
+      { q: "What does the woman suggest adding?", choices: ["Tracking service", "Insurance", "Gift wrapping"], answer: 1, explain: "I would recommend adding insurance。" },
+      { q: "What information does the man write on the slip?", choices: ["The package value", "His flight number", "The recipient's address"], answer: 2, explain: "this slip with the recipient's address and your extension number。" }
+    ]
+  },
+  {
+    title: "对话 11 · 采购加急",
+    script: [
+      "W: The printer toner we ordered is still out of stock at our usual supplier.",
+      "M: Really? We have a big printing job for the sales conference next week.",
+      "W: Exactly. I found another vendor with the same model at a slightly higher price, but delivery is within two days.",
+      "M: Let's take it. The price difference is small compared with missing the conference.",
+      "W: OK, I will place the order now and ask them to confirm by e-mail.",
+      "M: Good. And order two extra packs so we do not run into this again."
+    ],
+    questions: [
+      { q: "What is the problem?", choices: ["The printer broke down", "The toner is out of stock", "The conference was canceled"], answer: 1, explain: "out of stock at our usual supplier。" },
+      { q: "Why will they accept the higher price?", choices: ["The quality is better", "Fast delivery matters for the conference", "The usual vendor raised its prices"], answer: 1, explain: "delivery is within two days + next week 的印刷任务。" },
+      { q: "What does the man ask the woman to order in addition?", choices: ["Two extra packs", "A new printer", "Conference brochures"], answer: 0, explain: "order two extra packs。" }
+    ]
+  },
+  {
+    title: "对话 12 · 新员工工位",
+    script: [
+      "M: Emi, the new accountant starts on Monday. Where should she sit?",
+      "W: The desk by the window on the third floor is empty now that Kenji transferred.",
+      "M: Is not that area reserved for the design team, though?",
+      "W: They moved to the fifth floor in April, so the whole row is open. The accounting team is right across the aisle.",
+      "M: Perfect. I will ask IT to set up a computer and phone there by Friday.",
+      "W: And remember to request her access card. She will need it for the third-floor door."
+    ],
+    questions: [
+      { q: "Where will the new accountant sit?", choices: ["On the fifth floor", "By the window on the third floor", "Next to the design team"], answer: 1, explain: "The desk by the window on the third floor。" },
+      { q: "Why is the desk empty?", choices: ["Kenji transferred", "The design team moved in", "It is being repaired"], answer: 0, explain: "empty now that Kenji transferred。" },
+      { q: "What will the man ask IT to do?", choices: ["Print an access card", "Set up a computer and phone", "Move a desk upstairs"], answer: 1, explain: "ask IT to set up a computer and phone。" }
+    ]
   }
 ];
 
@@ -288,6 +438,46 @@ const P4_DATA = [
       { q: "What is the maximum class size?", choices: ["Four", "Eight", "Twelve"], answer: 1, explain: "a maximum of eight students。" },
       { q: "What discount is offered?", choices: ["Free textbooks", "20 percent off three months", "A free trial class"], answer: 1, explain: "twenty percent discount on your first three months。" }
     ]
+  },
+  {
+    title: "广播 7 · 访客安排留言",
+    type: "电话留言",
+    script: "Hello, this is Rika from the head office. I am calling to confirm next Tuesday's branch visit. Our director, Mr. Ono, will arrive at your office at ten a.m. — thirty minutes later than we first discussed. He would like to tour the new warehouse before the lunch meeting, so please have a hard hat ready for him. Also, he prefers not to discuss the budget figures during the group session; save those for the one-on-one at three p.m. If the schedule needs adjusting, call me back at extension four-five-zero-two. Thank you.",
+    questions: [
+      { q: "What time will Mr. Ono arrive?", choices: ["9:30", "10:00", "10:30"], answer: 1, explain: "at ten a.m.（三十分钟延误是相对原计划 9:30 的干扰）。" },
+      { q: "What does the caller ask the branch to prepare?", choices: ["A budget report", "A hard hat", "Lunch reservations"], answer: 1, explain: "have a hard hat ready（参观仓库用）。" },
+      { q: "When should the budget figures be discussed?", choices: ["During the group session", "At the three p.m. meeting", "At the warehouse tour"], answer: 1, explain: "save those for the one-on-one at three p.m。" }
+    ]
+  },
+  {
+    title: "广播 8 · 牙科诊所录音",
+    type: "电话录音",
+    script: "Thank you for calling Sakura Dental Clinic. If you are calling to make, change, or cancel an appointment, please press one. Our hours are weekdays from nine to six-thirty, and Saturdays from nine to one. We are closed on Sundays and national holidays. For emergencies such as severe pain or a broken tooth, press two now to be connected to our emergency line; after-hours calls are transferred to the on-call dentist. Please note that same-day appointments are limited, so we recommend booking online, where you can also view available time slots. Your call is important to us.",
+    questions: [
+      { q: "What are the clinic's Saturday hours?", choices: ["9:00 to 1:00", "9:00 to 6:30", "Closed all day"], answer: 0, explain: "Saturdays from nine to one。" },
+      { q: "What should a caller with a broken tooth do?", choices: ["Press one", "Press two", "Book online"], answer: 1, explain: "emergencies such as severe pain or a broken tooth → press two。" },
+      { q: "What does the message recommend for same-day appointments?", choices: ["Coming before nine", "Calling after six", "Booking online"], answer: 2, explain: "we recommend booking online。" }
+    ]
+  },
+  {
+    title: "广播 9 · 大楼停电通知",
+    type: "内部广播",
+    script: "May I have your attention, please? This Saturday, the building's electrical system will be inspected, and power to floors three through six will be shut off from eight a.m. until approximately noon. Employees who plan to work on those floors should relocate to the second-floor meeting rooms, which will remain open. The elevator will not stop at those floors during the outage, so please use the stairs if you need to pass through. The cafeteria and all first-floor services are unaffected. We apologize for the inconvenience and thank you for your cooperation.",
+    questions: [
+      { q: "Which floors will lose power?", choices: ["Floors one and two", "Floors three through six", "All floors"], answer: 1, explain: "power to floors three through six will be shut off。" },
+      { q: "Where should affected employees work?", choices: ["At home", "In second-floor meeting rooms", "In the cafeteria"], answer: 1, explain: "relocate to the second-floor meeting rooms。" },
+      { q: "What will happen to the elevator?", choices: ["It will not stop at the affected floors", "It will be out of service all day", "It will run normally"], answer: 0, explain: "The elevator will not stop at those floors during the outage。" }
+    ]
+  },
+  {
+    title: "广播 10 · 餐厅周年庆广告",
+    type: "电台广告",
+    script: "Celebrate with us! The Harbor View Restaurant turns twenty this month, and you are invited to our anniversary week. From Monday through Friday, all lunch courses are half price, and every dinner guest receives a free dessert. Win a dinner for two: simply post a photo of your favorite dish with the tag Harbor View Twenty. Ten winners will be chosen each Friday. We are open every day from eleven a.m. to ten p.m., on the third floor of the Marine Tower building, next to the fountain plaza. Reservations are recommended. Call zero-three, one-two-three-four, five-six-seven-eight, or book through our website. Harbor View: twenty years by the sea.",
+    questions: [
+      { q: "What is being celebrated?", choices: ["The restaurant's twentieth anniversary", "A new menu launch", "The tower's opening"], answer: 0, explain: "turns twenty this month... anniversary week。" },
+      { q: "What special offer applies to dinner guests?", choices: ["Half-price courses", "A free dessert", "A twenty percent coupon"], answer: 1, explain: "half price 是午餐；晚餐送 free dessert。" },
+      { q: "How can customers win a dinner for two?", choices: ["By posting a photo with a tag", "By reserving a table early", "By signing up for membership"], answer: 0, explain: "post a photo with the tag Harbor View Twenty。" }
+    ]
   }
 ];
 
@@ -322,7 +512,27 @@ const P5_DATA = [
   { q: "The employees enjoyed ______ at the company picnic.", choices: ["they", "their", "themselves", "them"], answer: 2, explain: "enjoy oneself 固定搭配，用反身代词。", tag: "代词" },
   { q: "No sooner had the meeting started ______ the power went out.", choices: ["when", "than", "that", "then"], answer: 1, explain: "no sooner... than 固定搭配，注意与 hardly... when 区分。", tag: "固定结构" },
   { q: "This year's revenue is ______ higher than last year's.", choices: ["significant", "significantly", "significance", "signify"], answer: 1, explain: "修饰形容词 higher 用副词 significantly。", tag: "词性" },
-  { q: "Please ensure that all doors ______ locked before leaving.", choices: ["are", "be", "being", "to be"], answer: 0, explain: "that 从句需要完整谓语 → are locked。", tag: "从句" }
+  { q: "Please ensure that all doors ______ locked before leaving.", choices: ["are", "be", "being", "to be"], answer: 0, explain: "that 从句需要完整谓语 → are locked。", tag: "从句" },
+  { q: "The proposal was rejected ______ its high estimated cost.", choices: ["because", "because of", "although", "despite"], answer: 1, explain: "because of + 名词短语；because + 从句。", tag: "连词" },
+  { q: "______ of the three candidates performed well in the interview.", choices: ["Both", "All", "Every", "Either"], answer: 1, explain: "三者及以上用 all；both/either 只用于两者。", tag: "代词" },
+  { q: "The technician finished the repairs ______ than we expected.", choices: ["more quickly", "quicklier", "most quickly", "quickly"], answer: 0, explain: "多音节副词比较级 more quickly；quicklier 不存在。", tag: "比较级" },
+  { q: "Please ______ the contract carefully before signing it.", choices: ["review", "reviewing", "to review", "reviewed"], answer: 0, explain: "祈使句以动词原形开头。", tag: "祈使句" },
+  { q: "The accountant ______ the figures when the power went out.", choices: ["checked", "was checking", "has checked", "checks"], answer: 1, explain: "过去进行时表示过去某时正在进行的动作。", tag: "时态" },
+  { q: "The seminar room can ______ up to fifty people.", choices: ["accommodate", "accommodation", "accommodating", "accommodates"], answer: 0, explain: "can + 动词原形。", tag: "动词形式" },
+  { q: "______ the weather improves, the outdoor ceremony will be moved indoors.", choices: ["Unless", "If", "Although", "Whether"], answer: 0, explain: "unless = 如果不：天气不转好就移到室内。", tag: "条件句" },
+  { q: "The consultant's report was ______ detailed and easy to follow.", choices: ["neither", "either", "both", "not"], answer: 2, explain: "both... and... 连接两个并列形容词。", tag: "固定结构" },
+  { q: "All prices are ______ to change without notice.", choices: ["subject", "subjected", "subjective", "subjection"], answer: 0, explain: "be subject to（可能受……影响）固定搭配，注意与 be subjected to 区分。", tag: "固定搭配" },
+  { q: "The manager asked me ______ the report by Thursday.", choices: ["finish", "finishing", "to finish", "finished"], answer: 2, explain: "ask sb to do sth。", tag: "不定式" },
+  { q: "Mr. Watanabe rarely ______ meetings on time.", choices: ["attend", "attends", "attending", "to attend"], answer: 1, explain: "主语三单 + 一般现在时 → attends。", tag: "主谓一致" },
+  { q: "The goods were damaged ______ transit.", choices: ["on", "at", "in", "by"], answer: 2, explain: "in transit（运输途中）固定短语。", tag: "介词搭配" },
+  { q: "We look forward to ______ from you soon.", choices: ["hear", "hearing", "be heard", "have heard"], answer: 1, explain: "look forward to 中 to 是介词 → + doing。超高频考点！", tag: "动名词" },
+  { q: "The number of applicants ______ increased this year.", choices: ["have", "has", "are", "were"], answer: 1, explain: "the number of + 复数名词作主语时谓语用单数。", tag: "主谓一致" },
+  { q: "The instructions ______ on the first page are easy to follow.", choices: ["listing", "listed", "list", "to listing"], answer: 1, explain: "过去分词后置定语：instructions (that are) listed。", tag: "分词" },
+  { q: "The shipment should have arrived ______ now.", choices: ["by", "until", "at", "for"], answer: 0, explain: "by now（到此刻为止）固定表达。", tag: "介词" },
+  { q: "The new policy applies ______ all part-time employees.", choices: ["for", "to", "with", "on"], answer: 1, explain: "apply to sb（适用于）固定搭配。", tag: "介词搭配" },
+  { q: "Hardly ______ the office when the client called again.", choices: ["she left", "did she leave", "she had left", "does she leave"], answer: 1, explain: "hardly... when 结构 + 否定副词开头用倒装 did she leave。", tag: "倒装" },
+  { q: "The brochure is available ______ English and Japanese.", choices: ["both in", "in both", "both of", "of both"], answer: 1, explain: "in both English and Japanese（可用两种语言）。", tag: "介词" },
+  { q: "We are considering ______ the launch date by a week.", choices: ["postpone", "to postpone", "postponing", "postponed"], answer: 2, explain: "consider + doing（考虑做某事），不接不定式。", tag: "动名词" }
 ];
 
 /* ============ 阅读 Part 6 长文填空（每篇 4 空） ============ */
@@ -389,6 +599,69 @@ const P6_DATA = [
       { choices: ["before", "after", "while", "until"], answer: 0, explain: "6 月 30 日「之前」续费享受折扣 → before。" },
       { choices: ["provide", "provided", "providing", "provision"], answer: 1, explain: "过去分词作前置定语：随函附上的信封 = the enclosed/provided envelope。" },
       { choices: ["hesitate", "hesitant", "hesitation", "hesitantly"], answer: 0, explain: "do not hesitate to contact 固定表达。" }
+    ]
+  },
+  {
+    title: "E-MAIL · 会议改期通知",
+    type: "E-MAIL",
+    lines: [
+      "Dear Ms. Brown,",
+      "Due to a scheduling conflict, the product review meeting originally planned for Monday, July 6 has been ______(1) to Friday, July 10, at 2 p.m. The meeting will now take place in conference room 3B instead of the executive boardroom. Please ______(2) the updated presentation slides, which are attached, before the meeting. If the new time is not ______(3) for you, contact my assistant by Wednesday so that alternative arrangements can be made. We appreciate your ______(4).",
+      "",
+      "Sincerely, David Kim, Project Coordinator"
+    ],
+    blanks: [
+      { choices: ["postponed", "posted", "posed", "positioned"], answer: 0, explain: "会议被推迟 → has been postponed。" },
+      { choices: ["review", "reviewing", "reviewed", "reviewer"], answer: 0, explain: "Please + 动词原形（祈使）。" },
+      { choices: ["convenient", "convenience", "conveniently", "convene"], answer: 0, explain: "is not convenient for you → 需要形容词。" },
+      { choices: ["understand", "understanding", "understandingly", "understandable"], answer: 1, explain: "your + 名词 → understanding（体谅）。" }
+    ]
+  },
+  {
+    title: "NOTICE · 健身房设备维护",
+    type: "NOTICE",
+    lines: [
+      "NOTICE — Fitness Center Equipment Maintenance",
+      "",
+      "The treadmills in the east section will be ______(1) for maintenance from March 10 to March 12. During this period, members are encouraged to use the eight treadmills in the west section, ______(2) will remain open as usual. Locker rooms will close at 9 p.m., thirty minutes earlier than ______(3). Personal training ______(4) are not affected by this schedule. We thank you for your patience."
+    ],
+    blanks: [
+      { choices: ["available", "unavailable", "availability", "availably"], answer: 1, explain: "维护期间不可用 → unavailable。" },
+      { choices: ["what", "which", "where", "who"], answer: 1, explain: "非限定定语从句（有逗号）指物 → which。" },
+      { choices: ["usual", "usually", "usualness", "unusually"], answer: 0, explain: "earlier than usual（比平时早）固定短语。" },
+      { choices: ["session", "sessions", "session's", "sessional"], answer: 1, explain: "are 提示复数可数名词 → sessions。" }
+    ]
+  },
+  {
+    title: "E-MAIL · 账单金额疑问",
+    type: "E-MAIL",
+    lines: [
+      "Dear Mr. Ling,",
+      "We are writing about invoice No. 4471, ______(1) on June 2. Our records show a total of 180,000 yen, but the amount due on your invoice is 195,000 yen. Could you please ______(2) the difference? We believe the shipping fee may ______(3) been charged twice. We would appreciate a corrected invoice ______(4) the end of the month so that we can process the payment promptly.",
+      "",
+      "Sincerely, Accounts Payable, Maruso Trading"
+    ],
+    blanks: [
+      { choices: ["issued", "issuing", "issue", "to issue"], answer: 0, explain: "invoice (which was) issued on June 2，过去分词后置定语。" },
+      { choices: ["explain", "explaining", "explanation", "explanatory"], answer: 0, explain: "Could you please + 动词原形。" },
+      { choices: ["has", "have", "had", "having"], answer: 1, explain: "may have been charged（可能被收了两次），情态动词后用原形 have。" },
+      { choices: ["by", "until", "since", "during"], answer: 0, explain: "by the end of the month（不晚于月底）。" }
+    ]
+  },
+  {
+    title: "LETTER · 展会感谢信",
+    type: "LETTER",
+    lines: [
+      "Dear Ms. Farid,",
+      "Thank you for attending the regional trade fair last week. We hope you had the ______(1) to speak with our product specialists at booth 12. To help us improve future events, we would be grateful ______(2) you could complete the short survey ______(3) at the link below; it takes fewer than five minutes. As a token of our appreciation, all respondents will receive a 15 percent discount code ______(4) online orders placed before September 30.",
+      "",
+      "Sincerely, Event Team, Northbridge Trade Association"
+    ],
+    blanks: [
+      { choices: ["opportunely", "opportune", "opportunity", "opportunities"], answer: 2, explain: "the + 名词 → opportunity（机会）。" },
+      { choices: ["if", "unless", "despite", "while"], answer: 0, explain: "we would be grateful if you could... 固定礼貌句型。" },
+      { choices: ["available", "availability", "availably", "avail"], answer: 0, explain: "survey (which is) available at the link → 形容词作后置定语。" },
+      { choices: ["for", "to", "with", "at"], answer: 0, explain: "discount code for online orders（用于网购的折扣码）。" }
     ]
   }
 ];
@@ -475,7 +748,69 @@ const P7_DATA = [
       { q: "Why does Hiro want to register by mid-September?", choices: ["To get the early-bird fee", "To receive free parking", "To choose the seats"], answer: 0, explain: "so we can pay the early-bird rate（9 月 15 日前 8,000 日元）。" },
       { q: "What is mentioned about the networking dinner?", choices: ["It costs 2,000 yen", "It is limited to 100 registrants", "It is open to all attendees"], answer: 1, explain: "the first 100 registrants are invited → 名额 100 人，所以 Hiro 说 if there are still places。" }
     ]
+  },
+  {
+    title: "E-MAIL · 会议餐点确认", type: "E-MAIL", double: false,
+    passages: [
+      "From: catering@grandplaza.co.jp\nTo: h.osebe@brighttech.co.jp\nSubject: Your catering order — confirmed\n\nDear Mr. Osebe,\n\nThank you for choosing Grand Plaza Catering. We are writing to confirm your order for the sales workshop on Thursday, September 18. We will deliver 30 boxed lunches to the reception desk of your office by 11:30 a.m. The order includes 8 vegetarian meals as requested. Payment will be charged to your company account after delivery; an itemized receipt will be e-mailed within two business days. If you need to change the number of lunches, please contact us by 5 p.m. on the day before delivery. Later changes cannot be guaranteed.\n\nGrand Plaza Catering"
+    ],
+    questions: [
+      { q: "When will the lunches be delivered?", choices: ["By 11:30 a.m. on Thursday", "At 5 p.m. on September 18", "Two business days after payment"], answer: 0, explain: "deliver... by 11:30 a.m. on Thursday, September 18。" },
+      { q: "What special request did the customer make?", choices: ["Early delivery", "Vegetarian meals", "Payment by credit card"], answer: 1, explain: "includes 8 vegetarian meals as requested。" },
+      { q: "What happens if changes are made after 5 p.m. the day before?", choices: ["A fee is charged", "They cannot be guaranteed", "The order is canceled"], answer: 1, explain: "Later changes cannot be guaranteed。" }
+    ]
+  },
+  {
+    title: "NOTICE · 免费投资讲座", type: "NOTICE", double: false,
+    passages: [
+      "Riverside Community Center\nFree Lecture: Introduction to Personal Investing\nDate: Saturday, October 4, 2:00-3:30 p.m.\nLocation: Main hall, second floor\nSpeaker: Yuki Hamasaki, financial advisor\n\nThe lecture will cover the basics of personal investing, including savings plans, retirement accounts, and risk management. No prior knowledge is required. Seats are limited to 80 people, and registration opens on our website at 9 a.m. on September 20. Each attendee will receive a free booklet, Planning Your Financial Future. Childcare is available for children aged 3-6; please request this when registering, as spaces are limited to 12 children."
+    ],
+    questions: [
+      { q: "Who is the lecture intended for?", choices: ["Financial advisors", "Beginners", "Certified accountants"], answer: 1, explain: "No prior knowledge is required → 面向初学者。" },
+      { q: "What will each attendee receive?", choices: ["A discount code", "A free booklet", "A savings plan"], answer: 1, explain: "a free booklet, Planning Your Financial Future。" },
+      { q: "What is stated about childcare?", choices: ["It is available for 12 children", "It costs extra", "It lasts all afternoon"], answer: 0, explain: "spaces are limited to 12 children。" }
+    ]
+  },
+  {
+    title: "ARTICLE · 老牌书店翻新重开", type: "ARTICLE", double: false,
+    passages: [
+      "City News — Hoshino Books Reopens After Renovation\n\nHoshino Books, a family-run bookstore in the Kanayama district, reopened last weekend after a three-month renovation. The store, founded in 1978, nearly closed last year when the owner considered retiring, but his daughter persuaded the family to modernize instead. The renovated shop now includes a small cafe, more seating, and a section dedicated to e-books and audiobooks, which customers can order in the store for home delivery. To celebrate the reopening, the first 50 visitors on each day of the opening weekend received a canvas tote bag. The store's operating hours have also been extended: it now opens at 9 a.m., one hour earlier than before, and closes at 8 p.m."
+    ],
+    questions: [
+      { q: "Why did the store almost close?", choices: ["The building was sold", "The owner considered retiring", "Sales kept falling"], answer: 1, explain: "nearly closed last year when the owner considered retiring。" },
+      { q: "What is new in the renovated store?", choices: ["A cafe", "A used-book section", "A printing service"], answer: 0, explain: "now includes a small cafe, more seating..." },
+      { q: "What change was made to operating hours?", choices: ["The closing time is later", "The opening time is earlier", "Sunday hours were added"], answer: 1, explain: "opens at 9 a.m., one hour earlier than before。" }
+    ]
+  },
+  {
+    title: "双篇 · 班车时间变更", type: "NOTICE + E-MAIL", double: true,
+    passages: [
+      "[NOTICE]\nEmployee Shuttle Bus — Schedule Change\n\nFrom October 1, the evening shuttle bus departing from the head office will leave at 6:45 p.m. instead of 6:30 p.m. The change allows the bus to connect with the new express train from Central Station, which arrives at 6:40 p.m. Morning schedules are unchanged. Employees who use the last shuttle should note that no late bus is provided, so those working past 6:45 p.m. should use their usual transportation and submit a travel expense claim. The updated timetable is posted on the intranet and at the security desk.",
+      "[E-MAIL]\nFrom: T. Maeda\nTo: Admin office\nSubject: Shuttle bus question\n\nHello,\n\nI usually take the 6:30 shuttle home, but I saw a notice about a schedule change starting next month. Could you confirm the new departure time? Also, I occasionally attend evening meetings that run past seven. Is there any way to get home by company transport after the last shuttle, or should I claim a taxi fare? I would appreciate an answer before the change takes effect.\n\nBest regards,\nT. Maeda"
+    ],
+    questions: [
+      { q: "Why is the evening shuttle time changing?", choices: ["To connect with a new train", "Because the old bus was retired", "To match the morning schedule"], answer: 0, explain: "allows the bus to connect with the new express train。" },
+      { q: "What does Mr. Maeda ask the admin office to confirm?", choices: ["The new departure time", "The morning schedule", "The taxi fare rate"], answer: 0, explain: "Could you confirm the new departure time?" },
+      { q: "What are employees who work past 6:45 p.m. told to do?", choices: ["Take the next shuttle", "Claim travel expenses", "Work from home"], answer: 1, explain: "submit a travel expense claim。" },
+      { q: "According to the notice, where can employees find the updated timetable?", choices: ["On the intranet", "In the e-mail", "At Central Station"], answer: 0, explain: "posted on the intranet and at the security desk。" }
+    ]
   }
+];
+
+/* ============ Part 5 语法考点速查 ============ */
+const GRAMMAR_CHEATSHEET = [
+  { point: "① 词性判断", signal: "空格前是 a/an/the/形容词 → 填名词；空格在动词后 → 副词或名词；修饰名词 → 形容词；修饰动词/形容词/整句 → 副词", demo: "The report was ___ organized. → skillfully（修饰动词）" },
+  { point: "② 主谓一致", signal: "主语后缺谓语：看单复数和时态；the number of + 单数；a number of + 复数", demo: "The number of visitors has doubled." },
+  { point: "③ 时态", signal: "since/for/so far/recently → 完成时；yesterday/last week/in 2020 → 过去时；usually/every day → 一般现在", demo: "She has worked here since 2020." },
+  { point: "④ 语态（被动）", signal: "主语是动作承受者，常伴 by/already/every month", demo: "Invoices are sent out monthly." },
+  { point: "⑤ 不定式 vs 动名词", signal: "want/decide/plan/ask sb + to do；enjoy/suggest/consider/avoid/finish/mind + doing；look forward to + doing", demo: "We are considering postponing the launch." },
+  { point: "⑥ 介词固定搭配", signal: "背熟高频搭配：in charge of / comply with / be familiar with / prior to / on behalf of / in transit / be subject to / apply to / compatible with", demo: "The policy applies to all staff." },
+  { point: "⑦ 比较级与最高级", signal: "than → 比较级；of all/in the group → 最高级；多音节词 more/most；修饰比较级用 even/much/far", demo: "The fee is higher than expected." },
+  { point: "⑧ 关系词", signal: "人 → who/whom；物 → which；地点 → where；时间 → when；逗号后（非限定）不能用 that", demo: "The hotel where we stayed has great reviews." },
+  { point: "⑨ 连词", signal: "看逻辑：因果 because + 句 / because of + 名词；转折 although + 句 / despite + 名词；条件 if / unless（=如果不）", demo: "Despite the rain, the event was held." },
+  { point: "⑩ 代词", signal: "it/they 指物；反身代词：enjoy oneself / by oneself / help yourself", demo: "The staff enjoyed themselves at the picnic." },
+  { point: "⑪ 倒装", signal: "No sooner... than / Hardly... when + 倒装；否定副词开头（Never/Rarely/Seldom）主谓倒装", demo: "No sooner had the meeting started than the power went out." },
+  { point: "⑫ 祈使句", signal: "祈使句以动词原形开头：Please review... / Contact us if...", demo: "Please ensure that all doors are locked." }
 ];
 
 /* ============ 考试结构（2018 改革后现行题型） ============ */
