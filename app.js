@@ -195,9 +195,14 @@ function renderDashboard(root) {
     <h1>TOEIC 高分学习助手</h1>
     <p>词汇 · 听力 · 听写 · 阅读 · 模考 · 错题本 —— 系统训练，目标高分</p>
   </div>
-  <div class="card challenge-todo" style="border-color:var(--brand)">
-    <h3>🗓️ 今日挑战</h3>
-    ${challengeDoneToday() ? `<p>✅ <b>今日挑战已完成</b>，又点亮了一天！</p><button class="btn" id="chStart">再练一轮（可选）</button>` : `<p>每天一组固定混合题：4 个单词 + 4 道题（优先弱项）+ 2 道错题，完成即点亮今天。</p><button class="btn big" id="chStart">开始今日挑战（约 8 分钟）</button>`}
+  <div class="card" style="border:1.5px solid #c9d1ff; background:linear-gradient(135deg, var(--brand-soft), transparent)">
+    <div class="challenge-flex">
+      <div>
+        <h3 style="margin-bottom:6px">🗓️ 今日挑战</h3>
+        <p>每天一组固定混合题：4 个单词 + 4 道题（优先弱项）+ 2 道错题，完成即点亮今天。</p>
+      </div>
+      ${challengeDoneToday() ? `<button class="btn" id="chStart">✅ 已完成 · 再练一轮</button>` : `<button class="btn primary" id="chStart" style="padding:12px 24px;white-space:nowrap">开始今日挑战</button>`}
+    </div>
   </div>
   <div class="grid grid-3">
     <div class="card">
@@ -220,7 +225,7 @@ function renderDashboard(root) {
     <div class="card">
       <h3>⚡ 今日推荐</h3>
       <div class="reco">📌 ${esc(rec.text)}</div>
-      <button class="btn big" data-go="${rec.go}" style="margin-top:10px;border-color:var(--brand);color:var(--brand)">立即去做 →</button>
+      <button class="btn big primary" data-go="${rec.go}" style="margin-top:10px">立即去做 →</button>
       <button class="btn big" data-go="vocab">背今天到期的单词（${dueWords("all").length} 个）</button>
       <button class="btn big" data-go="mock">做一次快速模考</button>
     </div>
@@ -489,7 +494,7 @@ function renderListening(root) {
     <div class="chips" id="lParts">${LISTEN_PARTS.map((p, i) => `<button class="chip ${i === 0 ? "active" : ""}" data-part="${p[0]}">${p[1]}（${p[2]}）</button>`).join("")}</div>
     <p class="muted" id="lPartDesc"></p>
     ${rateChipsHTML("lRate")}
-    <button class="btn big" id="lStart">开始练习</button>
+    <button class="btn big primary" id="lStart">开始练习</button>
   </div>
   <div id="lArea"></div>`;
   let part = "p1";
@@ -587,13 +592,15 @@ function renderReading(root) {
   <div class="card">
     <div class="chips" id="rParts">${READ_PARTS.map((p, i) => `<button class="chip ${i === 0 ? "active" : ""}" data-part="${p[0]}">${p[1]}（${p[2]}）</button>`).join("")}</div>
     <p class="muted" id="rPartDesc"></p>
-    <button class="btn big" id="rStart">开始练习</button>
+    ${rateChipsHTML("rRate")}
+    <button class="btn big primary" id="rStart">开始练习</button>
   </div>
   <div id="rArea"></div>`;
   let part = "p5";
   const desc = () => $("#rPartDesc").textContent = READ_PARTS.find((p) => p[0] === part)[3];
   desc();
   $$("#rParts .chip", root).forEach((ch) => ch.addEventListener("click", () => { $$("#rParts .chip", root).forEach((c) => c.classList.remove("active")); ch.classList.add("active"); part = ch.dataset.part; desc(); }));
+  bindRateChips("rRate");
   $("#rStart").addEventListener("click", () => startReading(part));
 }
 function startReading(part) {
@@ -688,7 +695,7 @@ function renderDictation(root) {
   root.innerHTML = `
   <div class="page-head"><h1>👂 听写训练</h1><p class="muted">最硬核的听力训练：听一句、写一句，系统逐词批改（大小写和标点不计）。先播一遍完整句子，写不出再重播。快捷键：数字 1-4 可用于选择题页，Enter 进入下一题。</p></div>
   <div class="card">
-    <button class="btn big" id="dtStart">开始听写（每次 5 句）</button>
+    <button class="btn big primary" id="dtStart">开始听写（每次 5 句）</button>
     ${rateChipsHTML("dtRate")}
     <p class="muted">句子来自 Part 2-4 题库，随机抽取（共 ${dictationSentences().length} 句）。建议 0.75 倍速起步，逐步提速。</p>
   </div>
@@ -778,7 +785,7 @@ function renderChallenge(root) {
   <div class="page-head"><h1>🗓️ 今日挑战</h1><p class="muted">每天一组固定混合题（当天不变）：4 个单词 + 4 道题（优先你的弱项）+ 2 道错题。完成即点亮今天。</p></div>
   <div class="card center">
     ${done ? `<p style="font-size:18px">✅ <b>今天的挑战已完成</b>，连续点亮每一天！</p>` : `<p style="font-size:16px">准备好了吗？一共 6-10 项，约 8 分钟。</p>`}
-    <button class="btn big" id="chGo" style="text-align:center">${done ? "再练一轮（不再重复点亮）" : "开始今日挑战"}</button>
+    <button class="btn big primary" id="chGo" style="text-align:center">${done ? "再练一轮（不再重复点亮）" : "开始今日挑战"}</button>
   </div>`;
   $("#chGo").addEventListener("click", startChallenge);
 }
@@ -858,7 +865,7 @@ function renderMock(root) {
   root.innerHTML = `
   <div class="page-head"><h1>⏱️ 模拟考试</h1><p class="muted">从题库随机抽题组卷，严格计时。成绩为按比例折算的<b>估算分</b>，仅供参考趋势。</p></div>
   <div class="grid grid-2">
-    <div class="card" style="border-color:var(--brand)"><h3>🏆 全真模考</h3><p>听力 100 题（P1×6 / P2×25 / P3×13 组 / P4×10 篇）+ 阅读 100 题（P5×30 / P6×4 篇 / P7 单篇全量 + 双篇精选 6 组）<br><b>标准 200 题 · 限时 120 分钟</b>（真实考试 45+75 节奏，听转读时有提示）</p><button class="btn big" data-m="full">开始</button></div>
+    <div class="card" style="border:1.5px solid #c9d1ff; background:linear-gradient(135deg, var(--brand-soft), transparent)"><h3>🏆 全真模考</h3><p>听力 100 题（P1×6 / P2×25 / P3×13 组 / P4×10 篇）+ 阅读 100 题（P5×30 / P6×4 篇 / P7 单篇全量 + 双篇精选 6 组）<br><b>标准 200 题 · 限时 120 分钟</b>（真实考试 45+75 节奏，听转读时有提示）</p><button class="btn big primary" data-m="full">开始</button></div>
     <div class="card"><h3>🎯 快速模考</h3><p>听力 22 题 + 阅读 26 题<br>限时 45 分钟</p><button class="btn big" data-m="quick">开始</button></div>
     <div class="card"><h3>🎧 听力专项</h3><p>Part 1-4 共 22 题<br>限时 25 分钟</p><button class="btn big" data-m="listen">开始</button></div>
     <div class="card"><h3>📖 阅读专项</h3><p>Part 5-7 共 26 题<br>限时 30 分钟</p><button class="btn big" data-m="read">开始</button></div>
@@ -1020,7 +1027,7 @@ function renderWrong(root) {
   <div class="card">
     <div class="stat-row"><span>待复习（已到期）</span><b>${due.length} 题</b></div>
     <div class="stat-row"><span>错题本总数</span><b>${state.wrongbook.length} 题</b></div>
-    <button class="btn big" id="wPractice" ${state.wrongbook.length ? "" : "disabled"}>${due.length ? "开始重练（先复习到期的 " + Math.min(15, due.length) + " 题）" : "开始重练（全部 " + state.wrongbook.length + " 题）"}</button>
+    <button class="btn big primary" id="wPractice" ${state.wrongbook.length ? "" : "disabled"}>${due.length ? "开始重练（先复习到期的 " + Math.min(15, due.length) + " 题）" : "开始重练（全部 " + state.wrongbook.length + " 题）"}</button>
     <button class="btn danger" id="wClear" ${state.wrongbook.length ? "" : "disabled"}>清空错题本</button>
   </div>
   <div id="wArea">
