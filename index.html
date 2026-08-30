@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>TOEIC 高分学习助手</title>
+<style>
+:root {
+  --bg: #f3f5fb;
+  --card: #ffffff;
+  --ink: #1c2333;
+  --muted: #6b7280;
+  --line: #e5e9f2;
+  --brand: #3552e0;
+  --brand-soft: #eef1ff;
+  --good: #16a34a;
+  --good-soft: #e8f7ee;
+  --bad: #dc2626;
+  --bad-soft: #fdecec;
+  --warn: #b45309;
+  --radius: 14px;
+}
+* { box-sizing: border-box; }
+body {
+  margin: 0; background: var(--bg); color: var(--ink);
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+  font-size: 15px; line-height: 1.6;
+}
+header {
+  position: sticky; top: 0; z-index: 10;
+  background: rgba(255,255,255,.92); backdrop-filter: blur(8px);
+  border-bottom: 1px solid var(--line);
+  padding: 10px 18px;
+  display: flex; align-items: center; gap: 14px; flex-wrap: wrap;
+}
+.logo { font-weight: 800; font-size: 17px; color: var(--brand); white-space: nowrap; }
+#nav { display: flex; gap: 6px; flex-wrap: wrap; }
+.nav-btn {
+  border: none; background: transparent; padding: 7px 12px; border-radius: 10px;
+  font-size: 14px; cursor: pointer; color: var(--ink); font-family: inherit;
+}
+.nav-btn:hover { background: var(--brand-soft); }
+.nav-btn.active { background: var(--brand); color: #fff; }
+main { max-width: 980px; margin: 0 auto; padding: 18px 16px 60px; }
+
+.hero {
+  background: linear-gradient(120deg, #3552e0, #6a3fd8 60%, #9333ea);
+  color: #fff; border-radius: var(--radius); padding: 26px 24px; margin-bottom: 16px;
+}
+.hero h1 { margin: 0 0 6px; font-size: 24px; }
+.hero p { margin: 0; opacity: .92; }
+
+.grid { display: grid; gap: 14px; }
+.grid-2 { grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); }
+.grid-3 { grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); }
+.card {
+  background: var(--card); border: 1px solid var(--line); border-radius: var(--radius);
+  padding: 18px 20px; margin-bottom: 14px;
+}
+.card h3 { margin: 0 0 10px; font-size: 16px; }
+.card h4 { margin: 14px 0 6px; font-size: 15px; color: var(--brand); }
+.card.note { background: #fffdf3; border-color: #f3e6bd; }
+.page-head { margin: 4px 2px 14px; }
+.page-head h1 { margin: 0; font-size: 22px; }
+.page-head p { margin: 4px 0 0; }
+.muted { color: var(--muted); font-size: 13px; }
+.lbl { display: block; margin: 12px 0 4px; font-size: 13px; color: var(--muted); }
+.center { text-align: center; }
+
+.btn {
+  display: inline-block; border: 1px solid var(--line); background: #fff; color: var(--ink);
+  padding: 8px 16px; border-radius: 10px; cursor: pointer; font-size: 14px; font-family: inherit;
+  transition: .15s;
+}
+.btn:hover { border-color: var(--brand); color: var(--brand); }
+.btn.big { display: block; width: 100%; text-align: left; margin-bottom: 8px; font-size: 15px; padding: 12px 14px; }
+.btn.sm { padding: 4px 10px; font-size: 13px; border-radius: 8px; }
+.btn.good { background: var(--good); border-color: var(--good); color: #fff; }
+.btn.bad { background: var(--bad); border-color: var(--bad); color: #fff; }
+.btn.danger { color: var(--bad); border-color: #f3c4c4; }
+.btn:disabled { opacity: .45; cursor: not-allowed; }
+.icon-btn { border: none; background: var(--brand-soft); border-radius: 8px; cursor: pointer; padding: 3px 8px; font-size: 14px; }
+.btn-row { display: flex; gap: 10px; margin-top: 12px; flex-wrap: wrap; }
+
+.chips { display: flex; gap: 8px; flex-wrap: wrap; }
+.chip {
+  border: 1px solid var(--line); background: #fff; border-radius: 999px;
+  padding: 6px 14px; cursor: pointer; font-size: 13.5px; font-family: inherit; color: var(--ink);
+}
+.chip.active { background: var(--brand); border-color: var(--brand); color: #fff; }
+
+input[type=date], input[type=range], select {
+  width: 100%; padding: 8px 10px; border: 1px solid var(--line); border-radius: 10px;
+  font-family: inherit; font-size: 14px; background: #fff; color: var(--ink);
+}
+.countdown { margin-top: 12px; font-size: 15px; }
+.countdown b { color: var(--brand); font-size: 20px; }
+.countdown.over { color: var(--muted); }
+.stat-row { display: flex; justify-content: space-between; padding: 7px 0; border-bottom: 1px dashed var(--line); }
+.stat-row:last-of-type { border-bottom: none; }
+.progress { height: 8px; background: var(--brand-soft); border-radius: 99px; margin-top: 8px; overflow: hidden; }
+.progress div { height: 100%; background: var(--brand); border-radius: 99px; transition: .4s; }
+
+.flashcard { max-width: 640px; }
+.fc-meta { color: var(--muted); font-size: 13px; margin-bottom: 10px; }
+.fc-word { font-size: 30px; font-weight: 700; margin: 6px 0 12px; }
+.fc-pos { font-size: 14px; color: var(--muted); font-weight: 400; margin-left: 6px; }
+.fc-meaning { background: var(--brand-soft); border-radius: 10px; padding: 12px 14px; margin: 8px 0; }
+.fc-zh { font-size: 18px; font-weight: 600; }
+.fc-ex { color: var(--muted); font-size: 14px; margin-top: 4px; font-style: italic; }
+
+.opt {
+  display: block; width: 100%; text-align: left; margin: 7px 0; padding: 10px 14px;
+  border: 1.5px solid var(--line); border-radius: 10px; background: #fff; cursor: pointer;
+  font-size: 14.5px; font-family: inherit; color: var(--ink); transition: .12s;
+}
+.opt:hover:not(:disabled) { border-color: var(--brand); }
+.opt.correct { border-color: var(--good); background: var(--good-soft); }
+.opt.wrong { border-color: var(--bad); background: var(--bad-soft); }
+.opt.picked { border-color: var(--brand); background: var(--brand-soft); }
+.opt.speaking { border-color: var(--brand); background: var(--brand-soft); }
+.opt:disabled { cursor: default; }
+
+.explain {
+  background: #f8fafc; border-left: 3px solid var(--brand); border-radius: 6px;
+  padding: 10px 12px; margin: 8px 0; font-size: 13.5px;
+}
+.photo-box {
+  background: #f0f4ff; border: 1px dashed #b9c6f5; border-radius: 10px;
+  padding: 12px 14px; margin: 8px 0 12px; font-size: 14px;
+}
+.passage {
+  background: #fafbfe; border: 1px solid var(--line); border-radius: 10px;
+  padding: 14px 16px; margin: 10px 0; font-size: 14px; line-height: 1.7;
+}
+.passage p { margin: 4px 0; }
+.transcript { background: #f7f7f2; border-radius: 10px; padding: 12px 14px; margin: 10px 0; font-size: 13.5px; }
+.transcript p { margin: 3px 0; }
+.q-block { margin: 14px 0 4px; }
+.q-text { font-weight: 600; margin-bottom: 4px; }
+.q-feed:empty { display: none; }
+
+.tbl { width: 100%; border-collapse: collapse; font-size: 13.5px; margin: 8px 0; }
+.tbl th, .tbl td { border: 1px solid var(--line); padding: 7px 10px; text-align: left; vertical-align: top; }
+.tbl th { background: #f7f8fc; }
+.tip-cell { color: var(--muted); font-size: 12.5px; }
+.score-num { font-size: 44px; font-weight: 800; color: var(--brand); }
+.score-num.total { color: #9333ea; }
+
+details.strategy { border: 1px solid var(--line); border-radius: 10px; padding: 10px 14px; margin: 8px 0; background: #fff; }
+details.strategy summary { cursor: pointer; font-weight: 600; }
+details.strategy ul { margin: 8px 0 2px; padding-left: 20px; }
+details.strategy li { margin: 4px 0; }
+.res-list { padding-left: 18px; margin: 6px 0; }
+.res-list li { margin: 10px 0; }
+.res-list a { color: var(--brand); font-weight: 600; text-decoration: none; }
+.res-list a:hover { text-decoration: underline; }
+details.wrong-item { border-bottom: 1px dashed var(--line); padding: 8px 2px; }
+details.wrong-item summary { cursor: pointer; font-size: 14px; }
+.mock-bar {
+  display: flex; align-items: center; justify-content: space-between; gap: 10px;
+  background: var(--ink); color: #fff; border-radius: var(--radius);
+  padding: 10px 16px; margin-bottom: 12px; font-size: 14px;
+}
+.timer { font-size: 18px; font-weight: 700; font-variant-numeric: tabular-nums; }
+footer { text-align: center; color: var(--muted); font-size: 12px; padding: 20px 0 8px; }
+@media (max-width: 640px) {
+  .fc-word { font-size: 24px; }
+  header { padding: 8px 10px; }
+}
+</style>
+</head>
+<body>
+<header>
+  <span class="logo">TOEIC 高分助手</span>
+  <nav id="nav"></nav>
+</header>
+<main>
+  <div id="view"></div>
+  <footer>TOEIC 高分学习助手 · 数据保存在本机浏览器（localStorage）· 目标：990 🎯</footer>
+</main>
+<script src="data_vocab.js"></script>
+<script src="data_questions.js"></script>
+<script src="app.js"></script>
+</body>
+</html>
