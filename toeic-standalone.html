@@ -1,0 +1,1830 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>TOEIC 高分学习助手（单文件版）</title>
+<style>
+:root {
+  --bg: #f3f5fb;
+  --card: #ffffff;
+  --ink: #1c2333;
+  --muted: #6b7280;
+  --line: #e5e9f2;
+  --brand: #3552e0;
+  --brand-soft: #eef1ff;
+  --good: #16a34a;
+  --good-soft: #e8f7ee;
+  --bad: #dc2626;
+  --bad-soft: #fdecec;
+  --warn: #b45309;
+  --radius: 14px;
+}
+* { box-sizing: border-box; }
+body {
+  margin: 0; background: var(--bg); color: var(--ink);
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+  font-size: 15px; line-height: 1.6;
+}
+header {
+  position: sticky; top: 0; z-index: 10;
+  background: rgba(255,255,255,.92); backdrop-filter: blur(8px);
+  border-bottom: 1px solid var(--line);
+  padding: 10px 18px;
+  display: flex; align-items: center; gap: 14px; flex-wrap: wrap;
+}
+.logo { font-weight: 800; font-size: 17px; color: var(--brand); white-space: nowrap; }
+#nav { display: flex; gap: 6px; flex-wrap: wrap; }
+.nav-btn {
+  border: none; background: transparent; padding: 7px 12px; border-radius: 10px;
+  font-size: 14px; cursor: pointer; color: var(--ink); font-family: inherit;
+}
+.nav-btn:hover { background: var(--brand-soft); }
+.nav-btn.active { background: var(--brand); color: #fff; }
+main { max-width: 980px; margin: 0 auto; padding: 18px 16px 60px; }
+
+.hero {
+  background: linear-gradient(120deg, #3552e0, #6a3fd8 60%, #9333ea);
+  color: #fff; border-radius: var(--radius); padding: 26px 24px; margin-bottom: 16px;
+}
+.hero h1 { margin: 0 0 6px; font-size: 24px; }
+.hero p { margin: 0; opacity: .92; }
+
+.grid { display: grid; gap: 14px; }
+.grid-2 { grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); }
+.grid-3 { grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); }
+.card {
+  background: var(--card); border: 1px solid var(--line); border-radius: var(--radius);
+  padding: 18px 20px; margin-bottom: 14px;
+}
+.card h3 { margin: 0 0 10px; font-size: 16px; }
+.card h4 { margin: 14px 0 6px; font-size: 15px; color: var(--brand); }
+.card.note { background: #fffdf3; border-color: #f3e6bd; }
+.page-head { margin: 4px 2px 14px; }
+.page-head h1 { margin: 0; font-size: 22px; }
+.page-head p { margin: 4px 0 0; }
+.muted { color: var(--muted); font-size: 13px; }
+.lbl { display: block; margin: 12px 0 4px; font-size: 13px; color: var(--muted); }
+.center { text-align: center; }
+
+.btn {
+  display: inline-block; border: 1px solid var(--line); background: #fff; color: var(--ink);
+  padding: 8px 16px; border-radius: 10px; cursor: pointer; font-size: 14px; font-family: inherit;
+  transition: .15s;
+}
+.btn:hover { border-color: var(--brand); color: var(--brand); }
+.btn.big { display: block; width: 100%; text-align: left; margin-bottom: 8px; font-size: 15px; padding: 12px 14px; }
+.btn.sm { padding: 4px 10px; font-size: 13px; border-radius: 8px; }
+.btn.good { background: var(--good); border-color: var(--good); color: #fff; }
+.btn.bad { background: var(--bad); border-color: var(--bad); color: #fff; }
+.btn.danger { color: var(--bad); border-color: #f3c4c4; }
+.btn:disabled { opacity: .45; cursor: not-allowed; }
+.icon-btn { border: none; background: var(--brand-soft); border-radius: 8px; cursor: pointer; padding: 3px 8px; font-size: 14px; }
+.btn-row { display: flex; gap: 10px; margin-top: 12px; flex-wrap: wrap; }
+
+.chips { display: flex; gap: 8px; flex-wrap: wrap; }
+.chip {
+  border: 1px solid var(--line); background: #fff; border-radius: 999px;
+  padding: 6px 14px; cursor: pointer; font-size: 13.5px; font-family: inherit; color: var(--ink);
+}
+.chip.active { background: var(--brand); border-color: var(--brand); color: #fff; }
+
+input[type=date], input[type=range], select {
+  width: 100%; padding: 8px 10px; border: 1px solid var(--line); border-radius: 10px;
+  font-family: inherit; font-size: 14px; background: #fff; color: var(--ink);
+}
+.countdown { margin-top: 12px; font-size: 15px; }
+.countdown b { color: var(--brand); font-size: 20px; }
+.countdown.over { color: var(--muted); }
+.stat-row { display: flex; justify-content: space-between; padding: 7px 0; border-bottom: 1px dashed var(--line); }
+.stat-row:last-of-type { border-bottom: none; }
+.progress { height: 8px; background: var(--brand-soft); border-radius: 99px; margin-top: 8px; overflow: hidden; }
+.progress div { height: 100%; background: var(--brand); border-radius: 99px; transition: .4s; }
+
+.flashcard { max-width: 640px; }
+.fc-meta { color: var(--muted); font-size: 13px; margin-bottom: 10px; }
+.fc-word { font-size: 30px; font-weight: 700; margin: 6px 0 12px; }
+.fc-pos { font-size: 14px; color: var(--muted); font-weight: 400; margin-left: 6px; }
+.fc-meaning { background: var(--brand-soft); border-radius: 10px; padding: 12px 14px; margin: 8px 0; }
+.fc-zh { font-size: 18px; font-weight: 600; }
+.fc-ex { color: var(--muted); font-size: 14px; margin-top: 4px; font-style: italic; }
+
+.opt {
+  display: block; width: 100%; text-align: left; margin: 7px 0; padding: 10px 14px;
+  border: 1.5px solid var(--line); border-radius: 10px; background: #fff; cursor: pointer;
+  font-size: 14.5px; font-family: inherit; color: var(--ink); transition: .12s;
+}
+.opt:hover:not(:disabled) { border-color: var(--brand); }
+.opt.correct { border-color: var(--good); background: var(--good-soft); }
+.opt.wrong { border-color: var(--bad); background: var(--bad-soft); }
+.opt.picked { border-color: var(--brand); background: var(--brand-soft); }
+.opt.speaking { border-color: var(--brand); background: var(--brand-soft); }
+.opt:disabled { cursor: default; }
+
+.explain {
+  background: #f8fafc; border-left: 3px solid var(--brand); border-radius: 6px;
+  padding: 10px 12px; margin: 8px 0; font-size: 13.5px;
+}
+.photo-box {
+  background: #f0f4ff; border: 1px dashed #b9c6f5; border-radius: 10px;
+  padding: 12px 14px; margin: 8px 0 12px; font-size: 14px;
+}
+.passage {
+  background: #fafbfe; border: 1px solid var(--line); border-radius: 10px;
+  padding: 14px 16px; margin: 10px 0; font-size: 14px; line-height: 1.7;
+}
+.passage p { margin: 4px 0; }
+.transcript { background: #f7f7f2; border-radius: 10px; padding: 12px 14px; margin: 10px 0; font-size: 13.5px; }
+.transcript p { margin: 3px 0; }
+.q-block { margin: 14px 0 4px; }
+.q-text { font-weight: 600; margin-bottom: 4px; }
+.q-feed:empty { display: none; }
+
+.tbl { width: 100%; border-collapse: collapse; font-size: 13.5px; margin: 8px 0; }
+.tbl th, .tbl td { border: 1px solid var(--line); padding: 7px 10px; text-align: left; vertical-align: top; }
+.tbl th { background: #f7f8fc; }
+.tip-cell { color: var(--muted); font-size: 12.5px; }
+.score-num { font-size: 44px; font-weight: 800; color: var(--brand); }
+.score-num.total { color: #9333ea; }
+
+details.strategy { border: 1px solid var(--line); border-radius: 10px; padding: 10px 14px; margin: 8px 0; background: #fff; }
+details.strategy summary { cursor: pointer; font-weight: 600; }
+details.strategy ul { margin: 8px 0 2px; padding-left: 20px; }
+details.strategy li { margin: 4px 0; }
+.res-list { padding-left: 18px; margin: 6px 0; }
+.res-list li { margin: 10px 0; }
+.res-list a { color: var(--brand); font-weight: 600; text-decoration: none; }
+.res-list a:hover { text-decoration: underline; }
+details.wrong-item { border-bottom: 1px dashed var(--line); padding: 8px 2px; }
+details.wrong-item summary { cursor: pointer; font-size: 14px; }
+.mock-bar {
+  display: flex; align-items: center; justify-content: space-between; gap: 10px;
+  background: var(--ink); color: #fff; border-radius: var(--radius);
+  padding: 10px 16px; margin-bottom: 12px; font-size: 14px;
+}
+.timer { font-size: 18px; font-weight: 700; font-variant-numeric: tabular-nums; }
+footer { text-align: center; color: var(--muted); font-size: 12px; padding: 20px 0 8px; }
+@media (max-width: 640px) {
+  .fc-word { font-size: 24px; }
+  header { padding: 8px 10px; }
+}
+</style>
+</head>
+<body>
+<header>
+  <span class="logo">TOEIC 高分助手</span>
+  <nav id="nav"></nav>
+</header>
+<main>
+  <div id="view"></div>
+  <footer>TOEIC 高分学习助手 · 数据保存在本机浏览器（localStorage）· 目标：990 🎯</footer>
+</main>
+<script>
+/* TOEIC 高分学习助手 - 词库数据 */
+/* eslint-disable */
+"use strict";
+
+/* 每个分类: {id, name, icon, words: [{w:单词, p:词性, zh:中文, ex:例句}]} */
+const VOCAB_DATA = [
+  {
+    id: "office", name: "办公室", icon: "🏢",
+    words: [
+      { w: "agenda", p: "n.", zh: "议程；议事日程", ex: "Please add this topic to the meeting agenda." },
+      { w: "minutes", p: "n.", zh: "会议记录", ex: "She is taking the minutes of the meeting." },
+      { w: "memo", p: "n.", zh: "备忘录；内部通知", ex: "The manager sent a memo to all staff." },
+      { w: "deadline", p: "n.", zh: "截止日期", ex: "The deadline for the report is Friday." },
+      { w: "colleague", p: "n.", zh: "同事", ex: "My colleagues are friendly and helpful." },
+      { w: "supervisor", p: "n.", zh: "主管；上司", ex: "Ask your supervisor for approval." },
+      { w: "department", p: "n.", zh: "部门", ex: "He works in the sales department." },
+      { w: "conference room", p: "n.", zh: "会议室", ex: "The conference room is booked at 3 p.m." },
+      { w: "schedule", p: "n./v.", zh: "日程；安排", ex: "Let's schedule the meeting for Monday." },
+      { w: "appointment", p: "n.", zh: "预约；约定", ex: "I have an appointment with the dentist." },
+      { w: "extension", p: "n.", zh: "分机（号）", ex: "What is your phone extension?" },
+      { w: "stationery", p: "n.", zh: "文具", ex: "Order more stationery for the office." },
+      { w: "photocopy", p: "n./v.", zh: "复印；复印件", ex: "Can you photocopy this contract?" },
+      { w: "printer", p: "n.", zh: "打印机", ex: "The printer is out of paper." },
+      { w: "projector", p: "n.", zh: "投影仪", ex: "Set up the projector for the presentation." },
+      { w: "assignment", p: "n.", zh: "任务；分配的工作", ex: "Finish the assignment by tomorrow." },
+      { w: "notice board", p: "n.", zh: "布告栏", ex: "Check the notice board for updates." },
+      { w: "workload", p: "n.", zh: "工作量", ex: "My workload is heavy this month." },
+      { w: "overtime", p: "n.", zh: "加班", ex: "He works overtime twice a week." },
+      { w: "relocate", p: "v.", zh: "搬迁；调动", ex: "The company will relocate to a new building." }
+    ]
+  },
+  {
+    id: "business", name: "会议与商务", icon: "🤝",
+    words: [
+      { w: "negotiate", p: "v.", zh: "谈判；协商", ex: "We plan to negotiate a lower price." },
+      { w: "contract", p: "n.", zh: "合同", ex: "Sign the contract before the end of the month." },
+      { w: "proposal", p: "n.", zh: "提案；建议书", ex: "The client rejected our proposal." },
+      { w: "client", p: "n.", zh: "客户", ex: "The client requested a revised design." },
+      { w: "vendor", p: "n.", zh: "供应商", ex: "Choose a vendor with good reviews." },
+      { w: "partnership", p: "n.", zh: "合作关系", ex: "The two firms formed a partnership." },
+      { w: "merger", p: "n.", zh: "合并", ex: "The merger will be completed next year." },
+      { w: "budget", p: "n.", zh: "预算", ex: "We exceeded our travel budget." },
+      { w: "revenue", p: "n.", zh: "营业收入", ex: "Revenue rose by 15 percent this quarter." },
+      { w: "profit", p: "n.", zh: "利润", ex: "The company doubled its profits." },
+      { w: "expense", p: "n.", zh: "费用；开支", ex: "Keep all receipts for business expenses." },
+      { w: "invoice", p: "n.", zh: "发票；账单", ex: "The invoice was sent on Monday." },
+      { w: "quotation", p: "n.", zh: "报价单", ex: "Request a quotation from three vendors." },
+      { w: "stakeholder", p: "n.", zh: "利益相关方", ex: "Present the plan to the stakeholders." },
+      { w: "presentation", p: "n.", zh: "演示；报告", ex: "His presentation was well organized." },
+      { w: "consensus", p: "n.", zh: "共识", ex: "The board finally reached a consensus." },
+      { w: "implement", p: "v.", zh: "实施；执行", ex: "Implement the new policy in April." },
+      { w: "evaluate", p: "v.", zh: "评估", ex: "We will evaluate the results next week." },
+      { w: "collaborate", p: "v.", zh: "合作", ex: "The two teams collaborated on the project." },
+      { w: "objective", p: "n.", zh: "目标", ex: "Set clear objectives for the team." }
+    ]
+  },
+  {
+    id: "hr", name: "人事招聘", icon: "👥",
+    words: [
+      { w: "recruit", p: "v.", zh: "招聘", ex: "The firm plans to recruit 50 engineers." },
+      { w: "applicant", p: "n.", zh: "申请者", ex: "Over 100 applicants applied for the post." },
+      { w: "resume", p: "n.", zh: "简历", ex: "Attach your resume to the application." },
+      { w: "interview", p: "n./v.", zh: "面试", ex: "She has a job interview tomorrow." },
+      { w: "hire", p: "v.", zh: "雇用", ex: "We hired two new designers." },
+      { w: "resign", p: "v.", zh: "辞职", ex: "He resigned after ten years." },
+      { w: "promote", p: "v.", zh: "晋升；提拔", ex: "She was promoted to manager." },
+      { w: "salary", p: "n.", zh: "薪水（月/年薪）", ex: "The salary is negotiable." },
+      { w: "wage", p: "n.", zh: "工资（时/周薪）", ex: "The minimum wage will rise next year." },
+      { w: "bonus", p: "n.", zh: "奖金", ex: "Employees get a yearly bonus." },
+      { w: "benefit", p: "n.", zh: "福利", ex: "Health insurance is a standard benefit." },
+      { w: "pension", p: "n.", zh: "养老金", ex: "He retired with a good pension." },
+      { w: "training", p: "n.", zh: "培训", ex: "New staff receive two weeks of training." },
+      { w: "workshop", p: "n.", zh: "研讨会；工作坊", ex: "Attend the leadership workshop on Friday." },
+      { w: "evaluation", p: "n.", zh: "绩效评估", ex: "My annual evaluation is next month." },
+      { w: "transfer", p: "n./v.", zh: "调动；转岗", ex: "He was transferred to the Osaka office." },
+      { w: "vacancy", p: "n.", zh: "空缺职位", ex: "There is a vacancy in the IT team." },
+      { w: "reference", p: "n.", zh: "推荐信；介绍人", ex: "List two references on your resume." },
+      { w: "probation", p: "n.", zh: "试用期", ex: "Probation lasts three months." },
+      { w: "layoff", p: "n.", zh: "裁员", ex: "The factory announced layoffs." }
+    ]
+  },
+  {
+    id: "finance", name: "财务金融", icon: "💰",
+    words: [
+      { w: "deposit", p: "n./v.", zh: "存款；押金", ex: "Pay a deposit to reserve the room." },
+      { w: "withdraw", p: "v.", zh: "取款；撤回", ex: "She withdrew cash from the ATM." },
+      { w: "account", p: "n.", zh: "账户", ex: "Open a business account online." },
+      { w: "interest", p: "n.", zh: "利息；兴趣", ex: "The bank raised interest rates." },
+      { w: "loan", p: "n.", zh: "贷款", ex: "They took out a loan to expand." },
+      { w: "investment", p: "n.", zh: "投资", ex: "This is a safe investment." },
+      { w: "stock", p: "n.", zh: "股票；库存", ex: "Tech stocks fell sharply yesterday." },
+      { w: "refund", p: "n./v.", zh: "退款", ex: "I requested a full refund." },
+      { w: "payment", p: "n.", zh: "付款；款项", ex: "Payment is due within 30 days." },
+      { w: "receipt", p: "n.", zh: "收据", ex: "Keep the receipt for your records." },
+      { w: "accounting", p: "n.", zh: "会计；财务", ex: "She works in accounting." },
+      { w: "audit", p: "n./v.", zh: "审计", ex: "The accounts are audited yearly." },
+      { w: "asset", p: "n.", zh: "资产", ex: "The building is a major asset." },
+      { w: "liability", p: "n.", zh: "负债；责任", ex: "Long-term debts are liabilities." },
+      { w: "transaction", p: "n.", zh: "交易", ex: "Check your recent transactions online." },
+      { w: "exchange rate", p: "n.", zh: "汇率", ex: "The exchange rate changed today." },
+      { w: "installment", p: "n.", zh: "分期付款", ex: "Pay in twelve monthly installments." },
+      { w: "expenditure", p: "n.", zh: "支出；花费", ex: "Cut unnecessary expenditures." },
+      { w: "statement", p: "n.", zh: "对账单；声明", ex: "Review your bank statement monthly." },
+      { w: "funds", p: "n.", zh: "资金", ex: "Transfer the funds by Friday." }
+    ]
+  },
+  {
+    id: "retail", name: "购物客服", icon: "🛒",
+    words: [
+      { w: "discount", p: "n.", zh: "折扣", ex: "Members get a 10 percent discount." },
+      { w: "purchase", p: "n./v.", zh: "购买", ex: "Keep proof of purchase." },
+      { w: "exchange", p: "n./v.", zh: "换货；兑换", ex: "Can I exchange this shirt?" },
+      { w: "out of stock", p: "phr.", zh: "缺货", ex: "The item is out of stock." },
+      { w: "deliver", p: "v.", zh: "送货；递送", ex: "We deliver within two days." },
+      { w: "warranty", p: "n.", zh: "保修（期）", ex: "The laptop has a two-year warranty." },
+      { w: "customer service", p: "n.", zh: "客服", ex: "Contact customer service for help." },
+      { w: "aisle", p: "n.", zh: "过道", ex: "Coffee is in aisle five." },
+      { w: "checkout", p: "n.", zh: "收银台；结账", ex: "There are five people at the checkout." },
+      { w: "price tag", p: "n.", zh: "价格标签", ex: "Check the price tag before paying." },
+      { w: "on sale", p: "phr.", zh: "降价出售", ex: "Winter coats are on sale now." },
+      { w: "merchandise", p: "n.", zh: "商品", ex: "The store displays new merchandise." },
+      { w: "brand", p: "n.", zh: "品牌", ex: "This brand is very popular." },
+      { w: "complaint", p: "n.", zh: "投诉", ex: "The manager handled the complaint well." },
+      { w: "loyalty card", p: "n.", zh: "会员卡", ex: "Scan your loyalty card at checkout." },
+      { w: "packaging", p: "n.", zh: "包装", ex: "The packaging was damaged." },
+      { w: "retail price", p: "n.", zh: "零售价", ex: "The retail price is 120 dollars." },
+      { w: "coupon", p: "n.", zh: "优惠券", ex: "Use this coupon at checkout." },
+      { w: "inventory", p: "n.", zh: "库存；清单", ex: "The inventory is checked monthly." },
+      { w: "restock", p: "v.", zh: "补货", ex: "We restock the shelves every morning." }
+    ]
+  },
+  {
+    id: "travel", name: "旅行交通", icon: "✈️",
+    words: [
+      { w: "flight", p: "n.", zh: "航班", ex: "The flight is on time." },
+      { w: "boarding pass", p: "n.", zh: "登机牌", ex: "Show your boarding pass at the gate." },
+      { w: "itinerary", p: "n.", zh: "行程表", ex: "Send me the trip itinerary." },
+      { w: "accommodation", p: "n.", zh: "住宿", ex: "Book accommodation near the station." },
+      { w: "reservation", p: "n.", zh: "预订", ex: "I have a reservation for two nights." },
+      { w: "depart", p: "v.", zh: "出发；离开", ex: "The train departs at 9:15." },
+      { w: "delay", p: "n./v.", zh: "延误", ex: "The flight was delayed two hours." },
+      { w: "cancel", p: "v.", zh: "取消", ex: "The trip was canceled due to snow." },
+      { w: "customs", p: "n.", zh: "海关", ex: "Go through customs before baggage claim." },
+      { w: "luggage", p: "n.", zh: "行李", ex: "Collect your luggage at carousel three." },
+      { w: "shuttle", p: "n.", zh: "班车；摆渡车", ex: "A free shuttle runs every 20 minutes." },
+      { w: "commute", p: "v./n.", zh: "通勤", ex: "She commutes to work by train." },
+      { w: "fare", p: "n.", zh: "车费；票价", ex: "The fare is 260 yen." },
+      { w: "round trip", p: "n.", zh: "往返（票）", ex: "A round-trip ticket is cheaper." },
+      { w: "terminal", p: "n.", zh: "航站楼；终点站", ex: "International flights leave from Terminal 2." },
+      { w: "check in", p: "phr.", zh: "办理登机/入住", ex: "Check in online to save time." },
+      { w: "destination", p: "n.", zh: "目的地", ex: "Kyoto is a popular destination." },
+      { w: "landmark", p: "n.", zh: "地标", ex: "The tower is a famous landmark." },
+      { w: "one-way ticket", p: "n.", zh: "单程票", ex: "I need a one-way ticket to Nagoya." },
+      { w: "jet lag", p: "n.", zh: "时差反应", ex: "He recovered from jet lag in two days." }
+    ]
+  },
+  {
+    id: "dining", name: "餐饮酒店", icon: "🍽️",
+    words: [
+      { w: "reserve", p: "v.", zh: "预订", ex: "Reserve a table for six." },
+      { w: "menu", p: "n.", zh: "菜单", ex: "The menu changes seasonally." },
+      { w: "appetizer", p: "n.", zh: "开胃菜", ex: "We ordered two appetizers." },
+      { w: "beverage", p: "n.", zh: "饮品", ex: "Beverages are included in the price." },
+      { w: "banquet", p: "n.", zh: "宴会", ex: "The banquet hall seats 200 guests." },
+      { w: "catering", p: "n.", zh: "餐饮承办", ex: "We hired a catering company." },
+      { w: "tip", p: "n.", zh: "小费", ex: "Leave a tip for the waiter." },
+      { w: "lobby", p: "n.", zh: "大堂", ex: "Wait for me in the hotel lobby." },
+      { w: "suite", p: "n.", zh: "套房", ex: "They booked the honeymoon suite." },
+      { w: "amenity", p: "n.", zh: "设施；便利服务", ex: "The gym is a popular amenity." },
+      { w: "housekeeping", p: "n.", zh: "客房服务；保洁", ex: "Housekeeping cleans the rooms daily." },
+      { w: "concierge", p: "n.", zh: "礼宾员；前台服务", ex: "Ask the concierge for restaurant advice." },
+      { w: "cuisine", p: "n.", zh: "菜肴；烹饪", ex: "Italian cuisine is popular here." },
+      { w: "special", p: "n.", zh: "特色菜；特价", ex: "Today's special is grilled fish." },
+      { w: "vegetarian", p: "n./a.", zh: "素食者；素的", ex: "Is there a vegetarian option?" },
+      { w: "vacancy", p: "n.", zh: "空房；空缺", ex: "Sorry, we have no vacancy tonight." },
+      { w: "bill", p: "n.", zh: "账单", ex: "Could we have the bill, please?" },
+      { w: "buffet", p: "n.", zh: "自助餐", ex: "Breakfast is served as a buffet." },
+      { w: "check-out time", p: "n.", zh: "退房时间", ex: "Check-out time is 11 a.m." },
+      { w: "complimentary", p: "a.", zh: "免费赠送的", ex: "Complimentary water in every room." }
+    ]
+  },
+  {
+    id: "tech", name: "技术设备", icon: "💻",
+    words: [
+      { w: "install", p: "v.", zh: "安装", ex: "Install the latest update tonight." },
+      { w: "upgrade", p: "v./n.", zh: "升级", ex: "The system will be upgraded on Sunday." },
+      { w: "malfunction", p: "n./v.", zh: "故障", ex: "The scanner malfunctioned again." },
+      { w: "repair", p: "n./v.", zh: "修理", ex: "The repair will take two days." },
+      { w: "maintenance", p: "n.", zh: "维护；保养", ex: "Scheduled maintenance is on Sunday." },
+      { w: "equipment", p: "n.", zh: "设备", ex: "Handle the equipment carefully." },
+      { w: "device", p: "n.", zh: "设备；装置", ex: "Connect your device to the Wi-Fi." },
+      { w: "network", p: "n.", zh: "网络", ex: "The network is slow today." },
+      { w: "server", p: "n.", zh: "服务器", ex: "The server is down this morning." },
+      { w: "software", p: "n.", zh: "软件", ex: "This software is free for staff." },
+      { w: "download", p: "v.", zh: "下载", ex: "Download the report from the site." },
+      { w: "attach", p: "v.", zh: "附上；附加", ex: "Attach the file to the e-mail." },
+      { w: "back up", p: "phr.", zh: "备份", ex: "Back up your files daily." },
+      { w: "compatible", p: "a.", zh: "兼容的", ex: "It is compatible with all systems." },
+      { w: "troubleshoot", p: "v.", zh: "排查故障", ex: "Restart the device to troubleshoot." },
+      { w: "manual", p: "n.", zh: "说明书；手册", ex: "Read the manual before use." },
+      { w: "settings", p: "n.", zh: "设置", ex: "Change the settings to dark mode." },
+      { w: "battery", p: "n.", zh: "电池", ex: "The battery needs replacing." },
+      { w: "password", p: "n.", zh: "密码", ex: "Reset your password by e-mail." },
+      { w: "delete", p: "v.", zh: "删除", ex: "Delete the old version of the file." }
+    ]
+  },
+  {
+    id: "property", name: "建筑房产", icon: "🏗️",
+    words: [
+      { w: "construct", p: "v.", zh: "建造", ex: "A new bridge is being constructed." },
+      { w: "renovate", p: "v.", zh: "翻新；整修", ex: "They renovated the hotel lobby." },
+      { w: "contractor", p: "n.", zh: "承包商", ex: "Hire a licensed contractor." },
+      { w: "blueprint", p: "n.", zh: "蓝图；设计图", ex: "The blueprint needs approval." },
+      { w: "permit", p: "n.", zh: "许可证", ex: "Apply for a building permit first." },
+      { w: "inspection", p: "n.", zh: "检查；验收", ex: "The safety inspection passed." },
+      { w: "lease", p: "n.", zh: "租约", ex: "The lease ends in March." },
+      { w: "tenant", p: "n.", zh: "租户", ex: "Tenants must report water leaks." },
+      { w: "landlord", p: "n.", zh: "房东", ex: "The landlord fixed the heater." },
+      { w: "rent", p: "n./v.", zh: "租金；租用", ex: "Rent is due on the first." },
+      { w: "property", p: "n.", zh: "房产；地产", ex: "The property sells for 500,000 dollars." },
+      { w: "facility", p: "n.", zh: "设施", ex: "The facility has a large cafeteria." },
+      { w: "expand", p: "v.", zh: "扩建；扩张", ex: "The factory will expand next year." },
+      { w: "architect", p: "n.", zh: "建筑师", ex: "The architect designed the tower." },
+      { w: "estimate", p: "n./v.", zh: "估价；估计", ex: "Get an estimate before the repairs." },
+      { w: "completion", p: "n.", zh: "完工", ex: "Completion is set for June." },
+      { w: "site", p: "n.", zh: "工地；场所", ex: "Hard hats are required on site." },
+      { w: "demolish", p: "v.", zh: "拆除", ex: "The old wing was demolished." },
+      { w: "occupancy", p: "n.", zh: "入住；占用", ex: "The office reached full occupancy." },
+      { w: "utilities", p: "n.", zh: "水电煤气费", ex: "Utilities are included in the rent." }
+    ]
+  },
+  {
+    id: "marketing", name: "广告营销", icon: "📣",
+    words: [
+      { w: "campaign", p: "n.", zh: "宣传活动；广告战", ex: "The ad campaign starts on Monday." },
+      { w: "advertise", p: "v.", zh: "做广告", ex: "They advertise on social media." },
+      { w: "commercial", p: "n.", zh: "电视广告", ex: "The commercial aired during the game." },
+      { w: "billboard", p: "n.", zh: "广告牌", ex: "A new billboard went up downtown." },
+      { w: "slogan", p: "n.", zh: "口号；广告语", ex: "The new slogan is easy to remember." },
+      { w: "target audience", p: "n.", zh: "目标受众", ex: "Know your target audience well." },
+      { w: "launch", p: "v.", zh: "发布；推出", ex: "Launch the product in May." },
+      { w: "survey", p: "n.", zh: "调查", ex: "Fill out the customer survey." },
+      { w: "feedback", p: "n.", zh: "反馈", ex: "We value your feedback." },
+      { w: "market share", p: "n.", zh: "市场份额", ex: "Market share grew to 20 percent." },
+      { w: "brand image", p: "n.", zh: "品牌形象", ex: "The ad improved the brand image." },
+      { w: "endorsement", p: "n.", zh: "名人代言", ex: "The athlete signed an endorsement deal." },
+      { w: "newsletter", p: "n.", zh: "（内部）时事通讯", ex: "Subscribe to our monthly newsletter." },
+      { w: "brochure", p: "n.", zh: "小册子", ex: "Pick up a brochure at the desk." },
+      { w: "flyer", p: "n.", zh: "传单", ex: "Hand out flyers at the station." },
+      { w: "subscribe", p: "v.", zh: "订阅", ex: "Subscribe before Friday for a discount." },
+      { w: "promotion", p: "n.", zh: "促销；晋升", ex: "The spring promotion begins today." },
+      { w: "publicity", p: "n.", zh: "宣传；曝光", ex: "The event got free publicity." },
+      { w: "distribute", p: "v.", zh: "分发；分配", ex: "Distribute the samples to shoppers." },
+      { w: "consumer", p: "n.", zh: "消费者", ex: "Consumers prefer eco-friendly goods." }
+    ]
+  },
+  {
+    id: "phrases", name: "高频短语", icon: "💬",
+    words: [
+      { w: "take over", p: "phr.", zh: "接管；接任", ex: "A new CEO will take over in June." },
+      { w: "look into", p: "phr.", zh: "调查；研究", ex: "We are looking into the cause of the delay." },
+      { w: "run out of", p: "phr.", zh: "用完；耗尽", ex: "We ran out of printer paper." },
+      { w: "put off", p: "phr.", zh: "推迟", ex: "The meeting was put off until Monday." },
+      { w: "carry out", p: "phr.", zh: "执行；实施", ex: "Carry out the plan as scheduled." },
+      { w: "break down", p: "phr.", zh: "出故障；坏掉", ex: "The elevator broke down again." },
+      { w: "get back to", p: "phr.", zh: "稍后回复", ex: "I will get back to you by noon." },
+      { w: "hold off", p: "phr.", zh: "推迟；暂停", ex: "Let's hold off until prices drop." },
+      { w: "in charge of", p: "phr.", zh: "负责；主管", ex: "She is in charge of the sales team." },
+      { w: "on behalf of", p: "phr.", zh: "代表", ex: "He spoke on behalf of the team." },
+      { w: "up to date", p: "phr.", zh: "最新的；现时的", ex: "Keep the records up to date." },
+      { w: "as soon as possible", p: "phr.", zh: "尽快", ex: "Please reply as soon as possible." },
+      { w: "be scheduled to", p: "phr.", zh: "定于；按计划", ex: "The plane is scheduled to leave at noon." },
+      { w: "look forward to", p: "phr.", zh: "期待", ex: "I look forward to hearing from you." },
+      { w: "comply with", p: "phr.", zh: "遵守", ex: "Comply with all safety regulations." },
+      { w: "prior to", p: "phr.", zh: "在……之前", ex: "Confirm the details prior to departure." },
+      { w: "in advance", p: "phr.", zh: "提前；预先", ex: "Book two weeks in advance." },
+      { w: "no later than", p: "phr.", zh: "不晚于", ex: "Arrive no later than 8:30." },
+      { w: "be familiar with", p: "phr.", zh: "熟悉", ex: "Are you familiar with this software?" },
+      { w: "fill out", p: "phr.", zh: "填写（表格）", ex: "Fill out this form first, please." },
+      { w: "turn in", p: "phr.", zh: "提交；上交", ex: "Turn in your report by Friday." },
+      { w: "come up with", p: "phr.", zh: "想出；提出", ex: "She came up with a great idea." }
+    ]
+  }
+];
+
+</script>
+<script>
+/* TOEIC 高分学习助手 - 题库与备考资料数据 */
+/* eslint-disable */
+"use strict";
+
+/* ============ 听力 Part 1 照片描述（无照片时用场景文字代替，TTS 朗读四个选项） ============ */
+const P1_DATA = [
+  {
+    scene: "建筑工地上，几名工人戴着安全帽正在搬运材料，一辆卡车停在旁边。",
+    choices: [
+      "The workers are wearing hard hats.",
+      "The truck is being washed.",
+      "The building has been completed.",
+      "The men are painting a fence."
+    ],
+    answer: 0,
+    explain: "听到选项后快速区分动作主体与动作：照片中工人正在搬运材料且戴着安全帽。B、C、D 的动作均未发生。"
+  },
+  {
+    scene: "会议室里，一名女士站在投影屏幕前做演示，其他人坐在桌边听。",
+    choices: [
+      "The woman is cleaning the screen.",
+      "The men are moving the table.",
+      "The audience is watching a presentation.",
+      "The room is being painted."
+    ],
+    answer: 2,
+    explain: "P1 常见陷阱：用【正确的人 + 错误的动作】。现场是 presentation（演示），观众在观看。"
+  },
+  {
+    scene: "机场到达大厅，一些旅客正站在行李传送带旁等候行李。",
+    choices: [
+      "The travelers are boarding an airplane.",
+      "Some people are waiting at the baggage carousel.",
+      "The luggage is being sold at a discount.",
+      "The airport is under construction."
+    ],
+    answer: 1,
+    explain: "boarding（登机）发生在出发大厅；此处是到达大厅的 baggage carousel（行李传送带）。"
+  },
+  {
+    scene: "书店里，一名店员正在把新书摆上书架，几位顾客在浏览。",
+    choices: [
+      "The customers are arguing with the staff.",
+      "The store is displaying electronics.",
+      "The shelves are being stocked with books.",
+      "The clerk is ringing up a purchase."
+    ],
+    answer: 2,
+    explain: "be being + 过去分词（进行时被动）是 P1 高频结构：书架正被摆上书 = being stocked。"
+  },
+  {
+    scene: "修车厂里，一名技师正俯身检查汽车引擎。",
+    choices: [
+      "The car is being washed.",
+      "The mechanic is inspecting the engine.",
+      "The garage is being renovated.",
+      "The driver is parking the car."
+    ],
+    answer: 1,
+    explain: "inspect（检查）符合技师俯身查看引擎的动作；wash（洗车）是经典干扰项。"
+  },
+  {
+    scene: "公园里，一对夫妇正沿着湖边的小路慢跑，狗在他们身后跑。",
+    choices: [
+      "The couple is swimming in the lake.",
+      "The dog is sleeping under a tree.",
+      "People are jogging along the path.",
+      "The park is closed for maintenance."
+    ],
+    answer: 2,
+    explain: "jog along the path（沿小路慢跑）。P1 干扰项常把地点或动作换掉：swimming / sleeping 均与照片不符。"
+  }
+];
+
+/* ============ 听力 Part 2 问答（3 选 1） ============ */
+const P2_DATA = [
+  { q: "Where is the nearest bus stop?", choices: ["Around the corner, next to the bank.", "Yes, it is very near.", "By bus."], answer: 0, explain: "Where 问地点 → 选地点。C 用 by bus 回答了 How，是经典干扰。" },
+  { q: "Who is responsible for ordering office supplies?", choices: ["Every Monday morning.", "That is Ms. Park's job.", "At the supply room."], answer: 1, explain: "Who 问人 → 选人。A 回答 When，C 回答 Where。" },
+  { q: "When does the train to Boston leave?", choices: ["At quarter past nine.", "From Platform 3.", "It takes two hours."], answer: 0, explain: "When 问时间 → 选时间。B 是 Where 的答案，C 回答 How long。" },
+  { q: "Why was the meeting postponed?", choices: ["In the main conference room.", "Until next Friday.", "The manager is out of town."], answer: 2, explain: "Why 问原因 → 选理由。A 回答 Where，B 回答 Until when。" },
+  { q: "Did you finish the quarterly report?", choices: ["Yes, it is quarterly.", "I will send it to you by five.", "Once every three months."], answer: 1, explain: "Yes/No 问题的答案常省略 Yes/No，直接给信息。A、C 重复了 quarterly，无意义。" },
+  { q: "What time does the store open?", choices: ["Ten on weekdays.", "For about an hour.", "Stationery and toys."], answer: 0, explain: "What time 问钟点。B 回答 How long，C 回答 What（卖什么）。" },
+  { q: "How did you get to the conference?", choices: ["It was very informative.", "I took the expressway.", "Tomorrow at noon."], answer: 1, explain: "How 问方式 → 选交通方式。A 是对会议本身的评价。" },
+  { q: "Would you like coffee or tea?", choices: ["Tea, please.", "Yes, I would.", "The coffee machine is broken."], answer: 0, explain: "选择疑问句不能用 Yes/No 回答，要在选项中选一个。" },
+  { q: "Could you forward me that e-mail?", choices: ["Sure, what is your address?", "I received it yesterday.", "It was forwarded to me."], answer: 0, explain: "Could you...? 是请求 → 接受请求并询问必要信息。" },
+  { q: "Is Mr. Kim in the office today?", choices: ["No, he is at the client site until Thursday.", "Yes, it is in the office.", "He works on the fifth floor."], answer: 0, explain: "B 有语法错误；C 回答 Where。A 直接回答并补充信息，最佳。" },
+  { q: "How long will the renovation take?", choices: ["Two weeks ago.", "About two weeks.", "It started in April."], answer: 1, explain: "How long 问持续时间 → about + 时间段。A 是过去时间点。" },
+  { q: "Where should I put these boxes?", choices: ["They were shipped last week.", "For about a month.", "Leave them by the elevator."], answer: 2, explain: "Where 问地点 → 指令/地点。A 回答 When（寄出时间）。" },
+  { q: "What did you think of the presentation?", choices: ["Very impressive, especially the charts.", "At two o'clock.", "Mr. Lee gave it."], answer: 0, explain: "What did you think of...? 问评价 → 给出评价。B 回答 When。" },
+  { q: "Who called this morning?", choices: ["Someone from the printer company.", "At around ten o'clock.", "On the office phone."], answer: 0, explain: "Who 问人 → 选人。B、C 分别回答 When 和 Where（用哪部电话）。" },
+  { q: "Why is the copy machine out of order?", choices: ["In the copy room.", "The repairman is coming soon.", "It needs a new part."], answer: 2, explain: "Why 问原因 → 故障原因。B 是解决办法，不是原因。" },
+  { q: "Have you met the new accountant?", choices: ["Not yet, she starts on Monday.", "Yes, in the accounting software.", "She met the deadline."], answer: 0, explain: "现在完成时问经历 → Not yet + 补充信息是最佳答案。" },
+  { q: "Which elevator goes to the lobby?", choices: ["The one on the left.", "To the first floor.", "Every ten minutes."], answer: 0, explain: "Which 问哪一个 → 指别。B 看似合理但没指出是哪部电梯。" },
+  { q: "How much does membership cost?", choices: ["Once a year.", "Ninety dollars a year.", "With a credit card."], answer: 1, explain: "How much 问价格 → 选金额。A 回答 How often，C 回答支付方式。" },
+  { q: "Let's take a break before the next session.", choices: ["Good idea, I need some fresh air.", "The session starts at noon.", "I already took the train."], answer: 0, explain: "陈述+建议（Let's...）→ 用同意/评价回应，而不是答非所问。" },
+  { q: "Should we take the highway or the local road?", choices: ["It is two kilometers away.", "The highway is faster at this hour.", "We took a taxi last time."], answer: 1, explain: "选择疑问句 → 在两者中给出建议并说理由。" }
+];
+
+/* ============ 听力 Part 3 对话（每组 3 题） ============ */
+const P3_DATA = [
+  {
+    title: "对话 1 · 交货延迟",
+    script: [
+      "M: Lisa, did the print paper we ordered arrive? We are almost out.",
+      "W: No, the supplier called this morning. The delivery was delayed because of the storm last night.",
+      "M: That is a problem. The sales team needs it for tomorrow's customer catalogs.",
+      "W: I will ask them to send it by express courier. It should arrive by nine a.m.",
+      "M: Good. And please e-mail me the updated invoice if the shipping fee changed.",
+      "W: Sure. I will also check if we can get a discount on the next order."
+    ],
+    questions: [
+      { q: "What problem does the woman mention?", choices: ["A delayed delivery", "A lost invoice", "A canceled order"], answer: 0, explain: "关键词 delayed because of the storm。" },
+      { q: "What will the woman do first?", choices: ["Reprint the catalogs", "Arrange express shipping", "Call another supplier"], answer: 1, explain: "send it by express courier = 安排快递。" },
+      { q: "What does the man ask for by e-mail?", choices: ["The updated invoice", "The storm damage report", "The courier's phone number"], answer: 0, explain: "please e-mail me the updated invoice。" }
+    ]
+  },
+  {
+    title: "对话 2 · 面试改期",
+    script: [
+      "W: Good morning, may I speak to Mr. Sato? I am calling about your interview with our design team.",
+      "M: Yes, it is scheduled for Thursday at two p.m., right?",
+      "W: Actually, the interviewer has to attend a client meeting that afternoon. Could you come on Friday at ten instead?",
+      "M: Friday at ten works. Should I bring my portfolio?",
+      "W: Yes, and please arrive fifteen minutes early to fill out some paperwork at the reception desk.",
+      "M: No problem. I will bring an extra copy of my resume as well."
+    ],
+    questions: [
+      { q: "Why is the interview time changed?", choices: ["The applicant requested a different day", "The interviewer has a client meeting", "The office will be closed on Thursday"], answer: 1, explain: "the interviewer has to attend a client meeting。" },
+      { q: "What does the man agree to bring?", choices: ["A completed application form", "His portfolio", "Reference letters"], answer: 1, explain: "Should I bring my portfolio? — Yes。" },
+      { q: "What does the woman ask the man to do?", choices: ["Arrive early to complete paperwork", "E-mail his resume in advance", "Call the reception desk later"], answer: 0, explain: "arrive fifteen minutes early to fill out some paperwork。" }
+    ]
+  },
+  {
+    title: "对话 3 · 年末聚会",
+    script: [
+      "M: Maria, the planning committee wants your opinion on the year-end party.",
+      "W: Sure. Last year's restaurant was too small for everyone, though the food was excellent.",
+      "M: That is why we are looking at the Grand Hotel ballroom this time. It seats one hundred fifty people.",
+      "W: Perfect. But hotels are usually expensive. What is the budget per person?",
+      "M: About four thousand yen, including drinks. The hotel offered a group discount if we book by Friday.",
+      "W: Then let's confirm the booking today. I will e-mail the committee right away."
+    ],
+    questions: [
+      { q: "What is the problem with last year's venue?", choices: ["The food was poor", "It was too small", "It was far from the office"], answer: 1, explain: "too small for everyone。" },
+      { q: "What discount does the hotel offer?", choices: ["A lower rate for early booking", "Free drinks for everyone", "A reduced fee for members"], answer: 0, explain: "a group discount if we book by Friday = 提前预订优惠。" },
+      { q: "What will the woman do next?", choices: ["Visit the hotel in person", "E-mail the committee", "Prepare the invitations"], answer: 1, explain: "I will e-mail the committee right away。" }
+    ]
+  },
+  {
+    title: "对话 4 · 空调维修",
+    script: [
+      "W: This is Yuki from the front office. The air conditioner in conference room B is not working again.",
+      "M: Again? We replaced a part just last month. Let me check the service history... It is still under warranty, so the repair should be free.",
+      "W: Great. We have a client presentation there tomorrow morning.",
+      "M: A technician can come this afternoon between two and four. Will someone be in the room?",
+      "W: I will be there. And I will move the afternoon meeting to the cafeteria just in case."
+    ],
+    questions: [
+      { q: "What is the woman reporting?", choices: ["A broken air conditioner", "A lost service contract", "A water leak in the cafeteria"], answer: 0, explain: "The air conditioner is not working again。" },
+      { q: "Why will the repair be free?", choices: ["The equipment is under warranty", "The company paid for a service plan", "The part was replaced last month"], answer: 0, explain: "It is still under warranty。" },
+      { q: "What will the woman do?", choices: ["Cancel the client presentation", "Wait in conference room B", "Move a meeting to the cafeteria"], answer: 2, explain: "move the afternoon meeting to the cafeteria。" }
+    ]
+  },
+  {
+    title: "对话 5 · 酒店预订变更",
+    script: [
+      "M: Hello, I would like to change my reservation. I booked a single room for three nights from the twelfth.",
+      "W: Certainly, sir. May I have your name? ... Thank you, Mr. Chen. How would you like to change it?",
+      "M: My business trip is one day longer. I would like to extend my stay until the sixteenth, and switch to a twin room.",
+      "W: Let me see... The twin room is available for those dates at the same nightly rate. Breakfast is not included, though.",
+      "M: That is fine. How much would it be altogether?",
+      "W: With the corporate discount, it comes to fifty-two thousand yen for four nights."
+    ],
+    questions: [
+      { q: "Why does the man call?", choices: ["To cancel a reservation", "To change a reservation", "To confirm a payment"], answer: 1, explain: "I would like to change my reservation。" },
+      { q: "What does the woman say about breakfast?", choices: ["It is included in the rate", "It is not included", "It is served until ten a.m."], answer: 1, explain: "Breakfast is not included, though。" },
+      { q: "How much will the man pay?", choices: ["13,000 yen", "39,000 yen", "52,000 yen"], answer: 2, explain: "数字题：52,000 yen for four nights，注意别被 3 nights 或单价干扰。" }
+    ]
+  },
+  {
+    title: "对话 6 · 项目提前",
+    script: [
+      "W: Mr. Diaz, the client moved the launch date forward by one week. They want everything done by the twentieth now.",
+      "M: The twentieth? That is very tight. We still need to finish the packaging design and get it approved.",
+      "W: I know. Can your team handle the design by this Friday?",
+      "M: Yes, if I get two more designers. What about the client's approval process?",
+      "W: I will ask them to review it over the weekend instead of during the week.",
+      "M: OK. Then we can still make it. I will send you our revised schedule today."
+    ],
+    questions: [
+      { q: "What change did the client make?", choices: ["They increased the budget", "They moved the launch date earlier", "They added new product features"], answer: 1, explain: "moved the launch date forward = 提前。" },
+      { q: "What does the man need to finish on time?", choices: ["Two more designers", "A new packaging supplier", "Extra office space"], answer: 0, explain: "Yes, if I get two more designers。" },
+      { q: "What does the woman offer to do?", choices: ["Design the packaging herself", "Ask the client to review on the weekend", "Extend the deadline"], answer: 1, explain: "ask them to review it over the weekend。" }
+    ]
+  },
+  {
+    title: "对话 7 · 培训课程",
+    script: [
+      "M: Hi, Anna. Did you attend the Excel training on Tuesday?",
+      "W: I did, but I had to leave early for a customer call, so I missed the part about charts.",
+      "M: There is a second session on Thursday morning. It covers the same material.",
+      "W: That would help. Is it in the small training room again?",
+      "M: No, too many people signed up this time, so it moved to the auditorium on the third floor.",
+      "W: Good to know. I will register online before the seats fill up."
+    ],
+    questions: [
+      { q: "Why did the woman leave the first session early?", choices: ["She had to call a customer", "She felt sick", "The session ended early"], answer: 0, explain: "I had to leave early for a customer call。" },
+      { q: "What is different about Thursday's session?", choices: ["The location", "The instructor", "The course material"], answer: 0, explain: "moved to the auditorium on the third floor。" },
+      { q: "What will the woman do?", choices: ["Register online", "Buy a textbook", "Cancel the customer call"], answer: 0, explain: "I will register online before the seats fill up。" }
+    ]
+  },
+  {
+    title: "对话 8 · 退货退款",
+    script: [
+      "W: Excuse me. I bought this coffee machine online last week, but it stopped working yesterday.",
+      "M: I am sorry to hear that. Do you have the receipt and the original box?",
+      "W: Yes, here they are. I would like a refund rather than a replacement.",
+      "M: Of course. Returns within thirty days get a full refund. It will go back to your card within five business days.",
+      "W: That is fine. Do I need to fill out a form?",
+      "M: Just this one at the counter. You will receive a confirmation e-mail once it is processed."
+    ],
+    questions: [
+      { q: "What does the woman want?", choices: ["A full refund", "A replacement part", "A store credit"], answer: 0, explain: "I would like a refund rather than a replacement。" },
+      { q: "What does the man say about the refund?", choices: ["It requires a receipt", "It takes five business days", "It is only for members"], answer: 1, explain: "within five business days 回到卡内。" },
+      { q: "What will the woman receive by e-mail?", choices: ["A discount coupon", "A confirmation message", "A shipping label"], answer: 1, explain: "a confirmation e-mail once it is processed。" }
+    ]
+  }
+];
+
+/* ============ 听力 Part 4 短文（每篇 3 题） ============ */
+const P4_DATA = [
+  {
+    title: "广播 1 · 机场广播",
+    type: "机场广播",
+    script: "Attention all passengers. This is an announcement for Flight J-L 412 to Singapore. Boarding will begin at ten twenty-five at Gate eighteen. Please have your boarding pass and passport ready. Passengers with young children or those who need special assistance may board first. We remind all travelers that carry-on luggage is limited to one bag. The departure time has been changed from ten forty-five to eleven o'clock due to weather conditions. Thank you for your cooperation.",
+    questions: [
+      { q: "What is the purpose of the announcement?", choices: ["To report a gate change", "To announce boarding information", "To offer a hotel voucher"], answer: 1, explain: "主题题： boarding will begin...。" },
+      { q: "Who may board first?", choices: ["Business-class passengers", "Passengers with young children", "Members of the airline club"], answer: 1, explain: "Passengers with young children... may board first。" },
+      { q: "Why was the departure time changed?", choices: ["Weather conditions", "A late crew", "Maintenance work"], answer: 0, explain: "due to weather conditions。" }
+    ]
+  },
+  {
+    title: "广播 2 · 电话留言",
+    type: "电话留言",
+    script: "Hi David, it's Michelle. I'm calling about tomorrow's branch visit. The manager I was supposed to meet had to fly to the Osaka office this morning, so our meeting is postponed until next Tuesday at two p.m. Also, the warehouse tour I wanted to arrange will not be possible this week because of the inventory count. Instead, could you send me the latest sales figures before Friday? I need them for the quarterly report. Call me back at your office number when you get this. Thanks.",
+    questions: [
+      { q: "Why was the meeting postponed?", choices: ["The manager traveled to Osaka", "Michelle is sick", "The warehouse is closed"], answer: 0, explain: "had to fly to the Osaka office。" },
+      { q: "What does Michelle ask David to do?", choices: ["Reschedule the warehouse tour", "Send sales figures", "Visit the branch on Tuesday"], answer: 1, explain: "could you send me the latest sales figures。" },
+      { q: "What does Michelle need the figures for?", choices: ["The quarterly report", "The inventory count", "The branch newsletter"], answer: 0, explain: "I need them for the quarterly report。" }
+    ]
+  },
+  {
+    title: "广播 3 · 电话录音",
+    type: "电话录音",
+    script: "Thank you for calling Northside Appliance Repair. Our office hours are Monday through Saturday, from nine a.m. to six p.m. We are closed on Sundays and public holidays. If you are calling to schedule a repair, please press one and have your product model number ready. For billing questions, press two. To speak with a service representative, please stay on the line; the current waiting time is approximately ten minutes. You may also visit our website to book an appointment and receive a ten percent discount on your first service.",
+    questions: [
+      { q: "What are the office hours on Saturday?", choices: ["Nine to six", "Ten to five", "Closed all day"], answer: 0, explain: "Monday through Saturday, from nine to six。" },
+      { q: "What should a caller do to schedule a repair?", choices: ["Press one", "Press two", "Send an e-mail"], answer: 0, explain: "to schedule a repair, please press one。" },
+      { q: "What discount is offered on the website?", choices: ["10 percent off the first service", "Free shipping on parts", "20 percent off the second visit"], answer: 0, explain: "a ten percent discount on your first service。" }
+    ]
+  },
+  {
+    title: "广播 4 · 导览解说",
+    type: "导览解说",
+    script: "Good morning, everyone, and welcome to the Riverside Museum. My name is Karen, and I will be your guide today. Before we enter, a few reminders: photography is allowed, but please do not use flash near the paintings. Food and drinks must remain in the cafe area. Our tour lasts about ninety minutes, and we will visit the new sculpture hall first. At noon, there will be a special demonstration by local artists in the main courtyard, which is free for all ticket holders. If you get separated from the group, please wait at the information desk near the main entrance.",
+    questions: [
+      { q: "What does the guide tell visitors to do?", choices: ["Avoid flash photography", "Leave bags at the entrance", "Buy tickets at the cafe"], answer: 0, explain: "please do not use flash near the paintings。" },
+      { q: "What will happen at noon?", choices: ["The museum closes", "An artist demonstration begins", "Lunch is served"], answer: 1, explain: "a special demonstration by local artists。" },
+      { q: "What should visitors do if separated from the group?", choices: ["Return to the bus", "Wait at the information desk", "Call the guide's office"], answer: 1, explain: "wait at the information desk。" }
+    ]
+  },
+  {
+    title: "广播 5 · 天气预报",
+    type: "天气预报",
+    script: "And now the local weather report. A cold front moving in from the north will bring heavy snow to the metropolitan area starting tonight around ten p.m. Snowfall may reach thirty centimeters by tomorrow morning, and strong winds are expected along the coast. Residents are advised to avoid unnecessary travel, as several train lines may suspend service. The city has announced that all community centers will open as warming shelters at eight p.m. Temperatures will rise above freezing by tomorrow afternoon, and conditions are expected to improve by the weekend.",
+    questions: [
+      { q: "When will the snow begin?", choices: ["Tonight around ten p.m.", "Tomorrow morning", "This afternoon"], answer: 0, explain: "starting tonight around ten p.m。" },
+      { q: "What does the city announce?", choices: ["Schools will close", "Community centers will open", "All trains will stop"], answer: 1, explain: "community centers will open as warming shelters。" },
+      { q: "When are conditions expected to improve?", choices: ["By tomorrow afternoon", "By the weekend", "Within a month"], answer: 1, explain: "expected to improve by the weekend。" }
+    ]
+  },
+  {
+    title: "广播 6 · 电台广告",
+    type: "电台广告",
+    script: "Do you want to speak English with confidence? At Brightway Language School, our business English courses focus on real workplace skills: meetings, presentations, and e-mail writing. Classes are small, with a maximum of eight students, so every learner gets personal attention. Enroll this month and receive a free level assessment plus a twenty percent discount on your first three months. We are open on weekdays until nine p.m., so you can study even after work. Visit our website or call zero-three, five-five-five-five, zero-one-nine-two. Brightway: English for your career.",
+    questions: [
+      { q: "What is being advertised?", choices: ["A language school", "A job agency", "An online bookstore"], answer: 0, explain: "Brightway Language School。" },
+      { q: "What is the maximum class size?", choices: ["Four", "Eight", "Twelve"], answer: 1, explain: "a maximum of eight students。" },
+      { q: "What discount is offered?", choices: ["Free textbooks", "20 percent off three months", "A free trial class"], answer: 1, explain: "twenty percent discount on your first three months。" }
+    ]
+  }
+];
+
+/* ============ 阅读 Part 5 短文填空（4 选 1） ============ */
+const P5_DATA = [
+  { q: "The quarterly report ______ by the accounting department every Friday.", choices: ["prepares", "is prepared", "preparing", "is preparing"], answer: 1, explain: "report 是被「准备」→ 一般现在时被动语态 is prepared。", tag: "时态与语态" },
+  { q: "Ms. Lee has been ______ to the Singapore office.", choices: ["transfer", "transferred", "transferring", "transferable"], answer: 1, explain: "has been + 过去分词 = 现在完成时被动，表示被调动。", tag: "时态与语态" },
+  { q: "All employees must submit their expense reports ______ Friday.", choices: ["by", "until", "since", "during"], answer: 0, explain: "「不晚于某时间点」用 by；until 强调持续到某时。", tag: "介词" },
+  { q: "The seminar was ______ informative that we extended the question period.", choices: ["such", "so", "very", "too"], answer: 1, explain: "so + 形容词 + that 固定结构。", tag: "固定结构" },
+  { q: "Because of the heavy rain, the delivery arrived ______ than expected.", choices: ["late", "later", "more late", "lately"], answer: 1, explain: "有 than 用比较级 later；lately 意为「最近」。", tag: "比较级" },
+  { q: "______ the client approves the design, we will begin production.", choices: ["When", "While", "During", "Whatever"], answer: 0, explain: "时间/条件状语从句；During 是介词不能接从句。", tag: "连词" },
+  { q: "The copier ______ yesterday has broken again.", choices: ["repaired", "was repaired", "repairing", "which repaired"], answer: 0, explain: "reduced relative：the copier (that was) repaired yesterday。B 会造成双谓语。", tag: "分词与从句" },
+  { q: "Ms. Perez, ______ is our new financial analyst, will join the meeting.", choices: ["that", "whom", "which", "who"], answer: 3, explain: "非限定定语从句指人做主语 → who；先行词后不能用 that。", tag: "关系词" },
+  { q: "Please contact me ______ you have any questions.", choices: ["whether", "if", "despite", "unless"], answer: 1, explain: "「如果有问题请联系我」→ if 条件句。", tag: "连词" },
+  { q: "The marketing team is working hard to ______ sales in Asia.", choices: ["increase", "increasing", "increased", "increases"], answer: 0, explain: "to + 动词原形构成不定式表目的。", tag: "动词形式" },
+  { q: "Employees ______ wear safety helmets in the warehouse at all times.", choices: ["can", "must", "might", "would"], answer: 1, explain: "at all times 表示强制规定 → must。", tag: "情态动词" },
+  { q: "The hotel ______ we stayed last week has excellent reviews.", choices: ["which", "that", "where", "when"], answer: 2, explain: "stay 是不及物动词（stay at the hotel）→ 地点关系副词 where。", tag: "关系词" },
+  { q: "______ Mr. Tanaka nor his assistant was able to attend the conference.", choices: ["Neither", "Either", "Both", "Not"], answer: 0, explain: "neither... nor 固定搭配；谓语就近一致用 was。", tag: "固定结构" },
+  { q: "The new software is compatible ______ all major operating systems.", choices: ["for", "with", "to", "of"], answer: 1, explain: "compatible with 固定搭配。", tag: "介词搭配" },
+  { q: "If the shipment ______ delayed, please notify the customer immediately.", choices: ["will be", "is", "would be", "were"], answer: 1, explain: "条件从句用一般现在时，不用 will/would。", tag: "条件句" },
+  { q: "The receptionist gave the visitors ______ about local restaurants.", choices: ["inform", "informative", "information", "informed"], answer: 2, explain: "gave + 间宾 + 直宾 → 需要名词 information。", tag: "词性" },
+  { q: "Mr. Cho has worked for this company ______ 2015.", choices: ["for", "since", "from", "in"], answer: 1, explain: "since + 过去时间点；for + 时间段。", tag: "介词" },
+  { q: "The board members discussed ______ the headquarters to a larger city.", choices: ["relocate", "to relocating", "relocating", "relocated"], answer: 2, explain: "discuss 后接动名词 doing，不接不定式。", tag: "动名词" },
+  { q: "The shipping fee is ______ in December than in other months.", choices: ["high", "higher", "highest", "more high"], answer: 1, explain: "有 than 用比较级 higher。", tag: "比较级" },
+  { q: "The annual banquet ______ place at the Grand Hotel this year.", choices: ["takes", "taking", "taken", "take"], answer: 0, explain: "take place 固定短语，主语单数 → takes。", tag: "固定短语" },
+  { q: "We regret ______ you that your application was not successful.", choices: ["informing", "to inform", "informed", "inform"], answer: 1, explain: "regret to do（遗憾地要做，告知坏消息）vs regret doing（后悔做过）。", tag: "不定式" },
+  { q: "The manager suggested ______ the deadline by two days.", choices: ["extend", "extending", "to extending", "extended"], answer: 1, explain: "suggest + doing；suggest to do 是错误用法。", tag: "动名词" },
+  { q: "Applicants ______ submit a cover letter along with their resume.", choices: ["are required to", "require to", "required", "are requiring"], answer: 0, explain: "be required to do 被要求做某事。", tag: "被动语态" },
+  { q: "The flight to Chicago has been ______ because of the snowstorm.", choices: ["canceled", "canceling", "cancel", "cancellation"], answer: 0, explain: "has been + 过去分词，现在完成时被动。", tag: "时态与语态" },
+  { q: "______ of the two proposals did the committee approve?", choices: ["What", "Which", "Who", "Whose"], answer: 1, explain: "在给定范围内选择用 Which；What 是开放性提问。", tag: "疑问词" },
+  { q: "Mr. Ibrahim is in charge ______ the sales department.", choices: ["of", "for", "with", "to"], answer: 0, explain: "in charge of 固定搭配。", tag: "介词搭配" },
+  { q: "The employees enjoyed ______ at the company picnic.", choices: ["they", "their", "themselves", "them"], answer: 2, explain: "enjoy oneself 固定搭配，用反身代词。", tag: "代词" },
+  { q: "No sooner had the meeting started ______ the power went out.", choices: ["when", "than", "that", "then"], answer: 1, explain: "no sooner... than 固定搭配，注意与 hardly... when 区分。", tag: "固定结构" },
+  { q: "This year's revenue is ______ higher than last year's.", choices: ["significant", "significantly", "significance", "signify"], answer: 1, explain: "修饰形容词 higher 用副词 significantly。", tag: "词性" },
+  { q: "Please ensure that all doors ______ locked before leaving.", choices: ["are", "be", "being", "to be"], answer: 0, explain: "that 从句需要完整谓语 → are locked。", tag: "从句" }
+];
+
+/* ============ 阅读 Part 6 长文填空（每篇 4 空） ============ */
+const P6_DATA = [
+  {
+    title: "MEMO · 销售培训",
+    type: "MEMO",
+    lines: [
+      "MEMO",
+      "To: All Sales Staff    From: Training Department",
+      "Subject: Updated Sales Training Program",
+      "",
+      "The Training Department ______(1) that a revised sales training program will begin next month. The program ______(2) new techniques for customer presentations. All sales staff ______(3) to attend the two-day workshop, which will be held at the head office. Since seats are limited, please register ______(4) April 10."
+    ],
+    blanks: [
+      { choices: ["announces", "announcing", "to announce", "announced"], answer: 0, explain: "主语 The Department + 缺谓语 → 第三人称单数 announces。" },
+      { choices: ["include", "includes", "including", "inclusive"], answer: 1, explain: "program 单数 → includes；including 是介词用法。" },
+      { choices: ["require", "requiring", "are required", "requirement"], answer: 2, explain: "staff 是被要求 → are required to do。" },
+      { choices: ["by", "until", "since", "during"], answer: 0, explain: "截止日期用 by。" }
+    ]
+  },
+  {
+    title: "E-MAIL · 订单发货",
+    type: "E-MAIL",
+    lines: [
+      "Dear Ms. Novak,",
+      "Thank you for your order. We are pleased to inform you that the office chairs you ______(1) on May 2 have been shipped. Your order should ______(2) within three business days. If any item arrives damaged, please contact us ______(3) so that we can arrange a replacement. A copy of the delivery notice is ______(4) to this e-mail.",
+      "",
+      "Sincerely, Customer Support Team"
+    ],
+    blanks: [
+      { choices: ["place", "placed", "placing", "placement"], answer: 1, explain: "you placed on May 2：省略 that 的定语从句，过去时。" },
+      { choices: ["arrive", "arrives", "arriving", "arrived"], answer: 0, explain: "should + 动词原形。" },
+      { choices: ["prompt", "promptly", "promptness", "prompting"], answer: 1, explain: "修饰动词 contact 用副词 promptly。" },
+      { choices: ["attach", "attaching", "attached", "attachment"], answer: 2, explain: "is attached to 被动：被附上。" }
+    ]
+  },
+  {
+    title: "NOTICE · 停车场关闭",
+    type: "NOTICE",
+    lines: [
+      "NOTICE — Parking Lot Closure",
+      "",
+      "The underground parking lot will be closed ______(1) Monday, June 9, for resurfacing work. During the closure, employees are ______(2) to use the public lot on Elm Street. A free shuttle bus will run between the two lots every fifteen minutes ______(3) 7 a.m. and 9 a.m. We ______(4) for any inconvenience this may cause."
+    ],
+    blanks: [
+      { choices: ["at", "on", "in", "by"], answer: 1, explain: "具体到某一天用 on Monday。" },
+      { choices: ["encourage", "encouraging", "encouraged", "encouragement"], answer: 2, explain: "are encouraged to do 被鼓励做。" },
+      { choices: ["among", "between", "during", "along"], answer: 1, explain: "between A and B 固定结构。" },
+      { choices: ["apologize", "apology", "apologetic", "apologetically"], answer: 0, explain: "缺谓语动词 → We apologize for。" }
+    ]
+  },
+  {
+    title: "LETTER · 会员续期",
+    type: "LETTER",
+    lines: [
+      "Dear Mr. Wu,",
+      "Your membership with the city business association will ______(1) at the end of this month. We hope you will renew for another year and continue to enjoy our networking events and training seminars. Members who renew ______(2) June 30 will receive a 10 percent discount on the annual fee. To renew, simply complete the enclosed form and return it in the ______(3) envelope. If you have any questions, please do not ______(4) to contact our office.",
+      "",
+      "Sincerely, Membership Services"
+    ],
+    blanks: [
+      { choices: ["expire", "expiring", "expired", "expiration"], answer: 0, explain: "will + 动词原形。" },
+      { choices: ["before", "after", "while", "until"], answer: 0, explain: "6 月 30 日「之前」续费享受折扣 → before。" },
+      { choices: ["provide", "provided", "providing", "provision"], answer: 1, explain: "过去分词作前置定语：随函附上的信封 = the enclosed/provided envelope。" },
+      { choices: ["hesitate", "hesitant", "hesitation", "hesitantly"], answer: 0, explain: "do not hesitate to contact 固定表达。" }
+    ]
+  }
+];
+
+/* ============ 阅读 Part 7 阅读（单篇 + 双篇） ============ */
+const P7_DATA = [
+  {
+    title: "E-MAIL · 会议改期", type: "E-MAIL", double: false,
+    passages: [
+      "From: Angela Reyes\nTo: All project members\nSubject: Meeting moved to Thursday\n\nDear team,\n\nBecause Mr. Lin is returning from his business trip a day later than planned, our project meeting has been moved from Wednesday to Thursday at 10 a.m. The location is unchanged: conference room 4A. Please review the revised agenda, which is attached to this e-mail, before we meet. If you cannot attend, let me know by Tuesday noon so that I can arrange for someone to take notes on your behalf.\n\nBest regards,\nAngela"
+    ],
+    questions: [
+      { q: "Why was the meeting rescheduled?", choices: ["The room was unavailable", "Mr. Lin's trip was extended", "The agenda was not ready"], answer: 1, explain: "returning a day later than planned。" },
+      { q: "What is attached to the e-mail?", choices: ["The revised agenda", "A travel itinerary", "Meeting minutes"], answer: 0, explain: "the revised agenda is attached。" },
+      { q: "What should members who cannot attend do?", choices: ["Review the minutes", "Reply by Tuesday noon", "Book conference room 4A"], answer: 1, explain: "let me know by Tuesday noon。" }
+    ]
+  },
+  {
+    title: "NOTICE · 图书馆假日时间", type: "NOTICE", double: false,
+    passages: [
+      "City Central Library — Holiday Hours\n\nThe library will operate on reduced hours during the Golden Week holidays, from April 29 to May 5. Opening hours will be 10 a.m. to 5 p.m., and the reading rooms will close thirty minutes before the building does. The children's story hour, normally held on Wednesdays, has been canceled during this period and will resume on May 7. Online reservations for study rooms remain available around the clock. Visitors returning borrowed items during the holidays may use the book drop next to the main entrance, which is open at all times."
+    ],
+    questions: [
+      { q: "What time will the reading rooms close during the holidays?", choices: ["4:30 p.m.", "5:00 p.m.", "5:30 p.m."], answer: 0, explain: "5 p.m. 前三十分钟 = 4:30。数字陷阱题。" },
+      { q: "What will happen on May 7?", choices: ["The library reopens", "The story hour resumes", "Holiday hours end"], answer: 1, explain: "will resume on May 7 指的是 story hour。" },
+      { q: "Where can visitors return books at any time?", choices: ["At the service desk", "In the book drop", "In the study rooms"], answer: 1, explain: "the book drop... open at all times。" }
+    ]
+  },
+  {
+    title: "ARTICLE · 新店开业", type: "ARTICLE", double: false,
+    passages: [
+      "Retail News — Bright Home Opens Fifth Store\n\nBright Home, a furniture retailer known for eco-friendly products, opened its fifth store in the Harumi district last Saturday. The new branch spans three floors and, unlike the company's other locations, includes a cafe that uses organic ingredients. To mark the opening, the first 200 customers received reusable shopping bags, and all items made from recycled materials were offered at a 15 percent discount over the weekend. Company president Aiko Mori said the firm plans to open two more stores next year if the Harumi branch meets its sales target within the first six months."
+    ],
+    questions: [
+      { q: "What is special about the new store?", choices: ["It is the largest branch", "It has a cafe", "It sells only used furniture"], answer: 1, explain: "unlike the other locations, includes a cafe。" },
+      { q: "What discount was offered over the weekend?", choices: ["15 percent off recycled-material items", "50 percent off all products", "Free bags with every purchase"], answer: 0, explain: "items made from recycled materials were offered at a 15 percent discount。" },
+      { q: "What condition affects the plan for two more stores?", choices: ["Hiring more staff", "Meeting a sales target", "Finding suitable locations"], answer: 1, explain: "if the branch meets its sales target。" }
+    ]
+  },
+  {
+    title: "MEMO · 邮件服务器维护", type: "MEMO", double: false,
+    passages: [
+      "MEMO\nTo: All employees\nFrom: IT Department\nSubject: E-mail server maintenance\n\nThe e-mail server will be unavailable this Saturday from 9 p.m. until approximately 2 a.m. on Sunday while scheduled maintenance is performed. During this time, employees will not be able to send or receive e-mails, and the address book will not load. No action is required on your part; all messages sent to you during the outage will be stored and delivered once the server is back online. Employees who experience problems after Sunday should contact the IT help desk at extension 2200."
+    ],
+    questions: [
+      { q: "How long will the maintenance last?", choices: ["2 hours", "5 hours", "9 hours"], answer: 1, explain: "9 p.m. 到次日 2 a.m. 共 5 小时。计算题。" },
+      { q: "What will happen to e-mails sent during the outage?", choices: ["They will be deleted", "They will be delivered later", "Senders will be notified"], answer: 1, explain: "stored and delivered once the server is back online。" },
+      { q: "Who should employees call if problems continue after Sunday?", choices: ["Extension 2200", "The server room", "Their supervisor"], answer: 0, explain: "IT help desk at extension 2200。" }
+    ]
+  },
+  {
+    title: "LETTER · 纸品调价通知", type: "LETTER", double: false,
+    passages: [
+      "Dear customers,\n\nEffective October 1, we will adjust the prices of our office paper products due to rising material costs. Orders placed before September 30 will be billed at current prices, even if delivery occurs later. We have held prices unchanged for three years, and this modest adjustment allows us to maintain the quality you expect. A complete list of new prices is enclosed. We deeply appreciate your continued business and look forward to serving you for many years to come.\n\nSato Paper Co., Ltd."
+    ],
+    questions: [
+      { q: "When do the new prices take effect?", choices: ["September 30", "October 1", "In three years"], answer: 1, explain: "Effective October 1。" },
+      { q: "How are orders placed before September 30 billed?", choices: ["At the new prices", "At the current prices", "With a 15 percent discount"], answer: 1, explain: "billed at current prices, even if delivery occurs later。" },
+      { q: "What is enclosed with the letter?", choices: ["A new catalog", "A price list", "An invoice"], answer: 1, explain: "a complete list of new prices is enclosed。" }
+    ]
+  },
+  {
+    title: "双篇 · 办公室搬迁", type: "E-MAIL + NOTICE", double: true,
+    passages: [
+      "[E-MAIL]\nFrom: Keiko Tanaka (Admin)\nTo: All staff\nSubject: Relocation of the sales department\n\nDear colleagues,\n\nThe sales department will move to the Riverside building on the weekend of September 12-13. Please pack your desk items by Friday, September 11, using the boxes provided. Desktop computers will be handled by the IT staff, so do not unplug them yourself. Elevator use will be reserved for movers that weekend. On Monday, September 14, come directly to the new office; your desk numbers will be posted near the entrance.\n\nKeiko",
+      "[NOTICE]\nRiverside Building Notice\n\nWelcome to the Riverside Building. Parking is available on levels B1 and B2 for a monthly fee of 15,000 yen; apply at the management office on the first floor. Building access cards will be issued at the reception desk on your first day; the cards are required to enter after 7 p.m. The employee cafeteria is on the second floor and accepts cash only during its first month of operation."
+    ],
+    questions: [
+      { q: "What are staff told to do with computers?", choices: ["Pack them in boxes", "Leave them to IT staff", "Unplug them on Friday"], answer: 1, explain: "computers will be handled by the IT staff。" },
+      { q: "Where will staff find their desk numbers?", choices: ["In the e-mail", "Near the new office entrance", "At the management office"], answer: 1, explain: "posted near the entrance。" },
+      { q: "What does the notice say about parking?", choices: ["It is free for new tenants", "It requires an application", "It is available on level 1"], answer: 1, explain: "apply at the management office。" },
+      { q: "During the cafeteria's first month, what payment is accepted?", choices: ["Cash only", "Credit cards only", "Access cards"], answer: 0, explain: "accepts cash only during its first month。" }
+    ]
+  },
+  {
+    title: "双篇 · 商务论坛报名", type: "AD + E-MAIL", double: true,
+    passages: [
+      "[ADVERTISEMENT]\nThe Kanagawa Business Forum — October 8\n\nJoin over 500 professionals at the annual Kanagawa Business Forum, held this year at the Grand Minato Hotel. This year's theme is \"Growing in a Digital World.\" Early-bird registration is 8,000 yen until September 15; after that date, the fee rises to 10,000 yen. All attendees receive a seminar handbook, and the first 100 registrants are invited to a free networking dinner. Group discounts are available for parties of five or more.",
+      "[E-MAIL]\nFrom: Hiro Yamada\nTo: Mika Sato\nSubject: Business forum\n\nHi Mika,\n\nFour of us from the marketing team are planning to attend the Business Forum on October 8. If we register together as a group, the fee is lower. Could you handle the registration? I would also like to attend the networking dinner if there are still places. Please register before the middle of September so we can pay the early-bird rate.\n\nHiro"
+    ],
+    questions: [
+      { q: "What is the theme of this year's forum?", choices: ["Growing in a Digital World", "New marketing strategies", "Hotel management trends"], answer: 0, explain: "This year's theme is \"Growing in a Digital World.\"" },
+      { q: "What does Hiro ask Mika to do?", choices: ["Reserve a hotel room", "Complete the group registration", "Prepare a seminar handbook"], answer: 1, explain: "Could you handle the registration?" },
+      { q: "Why does Hiro want to register by mid-September?", choices: ["To get the early-bird fee", "To receive free parking", "To choose the seats"], answer: 0, explain: "so we can pay the early-bird rate（9 月 15 日前 8,000 日元）。" },
+      { q: "What is mentioned about the networking dinner?", choices: ["It costs 2,000 yen", "It is limited to 100 registrants", "It is open to all attendees"], answer: 1, explain: "the first 100 registrants are invited → 名额 100 人，所以 Hiro 说 if there are still places。" }
+    ]
+  }
+];
+
+/* ============ 考试结构（2018 改革后现行题型） ============ */
+const EXAM_STRUCTURE = {
+  sections: [
+    {
+      name: "Listening 听力", time: "约 45 分钟", count: "100 题", score: "495 分",
+      parts: [
+        { p: "Part 1", n: "6 题", d: "照片描述：听 4 个句子，选出最符合照片的描述", tip: "有照片可先看；注意动词时态和能动态/被动态（is opening vs is open）" },
+        { p: "Part 2", n: "25 题", d: "应答问题：听 1 个问题或陈述，从 3 个选项中选最佳应答", tip: "抓住疑问词（Where/Why/Who/How）；警惕发音相似的引诱项；陈述句用同意/建议回应" },
+        { p: "Part 3", n: "39 题（13 组对话 × 3 题）", d: "对话理解：听 2-3 人的对话，每段答 3 题", tip: "利用读题时间先看题目和选项；答案按出题顺序出现；注意问题类型：主旨/细节/推断/接下来做什么" },
+        { p: "Part 4", n: "30 题（10 篇独白 × 3 题）", d: "短文理解：广播、留言、演讲等独白，每篇答 3 题", tip: "开头 1-2 句锁定场景和说话人；数字、日期、价格随手记" }
+      ]
+    },
+    {
+      name: "Reading 阅读", time: "75 分钟", count: "100 题", score: "495 分",
+      parts: [
+        { p: "Part 5", n: "30 题", d: "短文填空：单句语法/词汇选择题", tip: "每题 20-30 秒；先判断空格词性；高频考点：动词时态语态、词性、介词搭配、比较级" },
+        { p: "Part 6", n: "16 题（4 篇 × 4 空）", d: "长文填空：邮件/通知等文书中 4 处填空", tip: "结合上下文语境 + 词性双重判断；30-40 秒/空" },
+        { p: "Part 7", n: "54 题（单篇 29 + 双篇 25）", d: "阅读理解：邮件、通知、广告、文章、双篇对比", tip: "时间管理是命门：给 Part 7 留足 50 分钟；先读题目再回原文定位；双篇题注意两文的共同点和差异" }
+      ]
+    }
+  ],
+  scoring: [
+    { band: "905-990", level: "国际商务顶级水平", note: "全球任何职场无障碍；名企海外岗位加分项" },
+    { band: "785-900", level: "高级商务水平", note: "日本大手企业晋升・海外赴任的常见门槛" },
+    { band: "605-780", level: "中级商务水平", note: "能处理日常业务邮件和会议；日企普遍要求 600+" },
+    { band: "405-600", level: "初级商务水平", note: "能应对基本办公沟通" },
+    { band: "10-400", level: "基础水平", note: "建议先补基础词汇和语法" }
+  ]
+};
+
+/* ============ 各 Part 高分策略 ============ */
+const STRATEGIES = [
+  {
+    part: "听力通用", icon: "🎧", points: [
+      "利用 Directions 和翻页间隙提前读题——正式考试里这是最大的时间红利",
+      "听不懂整句时抓住名词和动词：TOEIC 听力 80% 的答案围绕「谁做什么、时间、地点、原因」",
+      "遇到发音引诱项（题目里出现 station，选项说 statue）立即排除——相似发音必是陷阱",
+      "全卷不倒扣分：绝对不留空，最后 10 秒也要全部涂卡"
+    ]
+  },
+  {
+    part: "Part 1-2 快攻", icon: "📸", points: [
+      "Part 1：照片出现后先自己心里说一句话（谁在做什么），再对照选项",
+      "Part 1 高频结构：is + V-ing / is being + 过去分词 / has been + 过去分词",
+      "Part 2：疑问词决定答案方向——Where→地点、Why→原因、When→时间、How→方式、Who→人",
+      "Part 2 陈述句（Let's... / I'd like to...）用「回应语气」作答：同意、建议、感谢",
+      "Yes/No 问题正确答案经常不带 Yes/No，而是直接给出信息"
+    ]
+  },
+  {
+    part: "Part 3-4 提速", icon: "🗣️", points: [
+      "拿到题先读「问题句」，带着问题听——选项只需要扫一眼关键词",
+      "对话和独白都按题目顺序推进：第 1 题的答案一定在第 2 题答案之前出现",
+      "Part 3 注意问题类型：What is the problem? / Why...? / What will the man do next?（下一步动作常在对话结尾）",
+      "Part 4 开头句是钥匙：Announcement / Voice message / Tour guide 决定场景，场景决定词汇",
+      "数字题（价格、时间、时长）随手在草稿上记，最后统一核对"
+    ]
+  },
+  {
+    part: "Part 5-6 语法", icon: "📝", points: [
+      "先看空格前后的词判断词性：冠词/形容词后→名词；动词后→副词或名词；主语后缺→谓语动词",
+      "五大高频语法：①动词时态与主谓一致 ②词性判断 ③介词与固定搭配 ④比较级 ⑤关系词与从句",
+      "固定搭配优先：in charge of / be familiar with / comply with / prior to / on behalf of",
+      "Part 6 先通读判断文体（邮件/通知），空格处兼顾「语法对 + 语义通」",
+      "一题超过 40 秒立即选一个顺眼的标记跳过——后面 Part 7 的时间更值钱"
+    ]
+  },
+  {
+    part: "Part 7 阅读", icon: "📖", points: [
+      "时间分配参考：Part 5 用 10 分钟、Part 6 用 10 分钟、Part 7 保留 50-55 分钟",
+      "先读题干（不读选项）→ 带着关键词回原文定位 → 对比选项，避免通读全文",
+      "文章顺序 = 题目顺序：Not/EXCEPT 题除外，它们需要逐项回原文核对",
+      "双篇题常考「两篇的关系」：一封邮件+一篇通知、一篇广告+一封咨询邮件，重点找共同信息和矛盾点",
+      "「接下来大概率会做什么」类推断题：答案常在文末的动作请求或时间安排里"
+    ]
+  },
+  {
+    part: "考前冲刺", icon: "🚀", points: [
+      "考前两周：每 2-3 天一套完整官方题，严格计时，训练 2 小时专注力",
+      "错题本比刷新题重要：每道错题弄清「错在词汇、语法还是时间不够」",
+      "考前 3 天只复习：错题本 + 高频词 + 各 Part 的解题流程，不做新难题",
+      "考试当天：提前踩点；听力播放前深呼吸；涂卡节奏保持稳定（10 题一涂）"
+    ]
+  }
+];
+
+/* ============ 30 天冲刺计划 ============ */
+const STUDY_PLAN = [
+  { week: "第 1 周 · 打基础", days: "Day 1-7", tasks: [
+    "Day 1: 用软件「模拟考试-快速版」摸底，记录各 Part 正确率",
+    "每天背 25 个高频词（词汇页·闪卡模式），次日先复习昨日词汇",
+    "Part 5 每天 10 题（软件阅读页），按 tag 整理语法弱点",
+    "每天泛听 15 分钟：官方 App English Upgrader+ 或 BBC 6 Minute English"
+  ]},
+  { week: "第 2 周 · 听力攻坚", days: "Day 8-14", tasks: [
+    "Part 1+2 每天 15 题（软件听力页，0.9 倍速起步）",
+    "Part 3 每天一组（3 题），做完必看原文跟读一遍",
+    "每天背 25 个新词 + 复习（SRS 会自动安排到期词汇）",
+    "Day 14: 重做第一周的错题本"
+  ]},
+  { week: "第 3 周 · 阅读提速", days: "Day 15-21", tasks: [
+    "Part 5 每天 15 题限时（20 秒/题）",
+    "Part 6 每天一篇 + Part 7 每天一篇，先读题再回原文定位",
+    "听力保持：Part 4 每天两篇（1.0 倍速）",
+    "每天背 25 个新词 + 复习"
+  ]},
+  { week: "第 4 周 · 全真冲刺", days: "Day 22-30", tasks: [
+    "Day 22 & 26 & 29: 各做一套快速模拟（软件模考页），严格计时",
+    "每套模考后：错题全部进错题本，分析错因（词汇/语法/速度）",
+    "官方公式問題集做 1-2 套完整纸质版，训练涂卡节奏",
+    "Day 30: 只看错题本和策略页，早睡；考前不做新题"
+  ]}
+];
+
+/* ============ 精选备考资源（日本方向） ============ */
+const RESOURCES = [
+  {
+    cat: "官方网站（日本）", icon: "🏛️", items: [
+      { name: "IIBC TOEIC 官网（日本官方）", desc: "报名・考试日程・受験料・官方数据，日本考生的一切从这里开始", url: "https://www.iibc-global.org/toeic/" },
+      { name: "公式教材一覧", desc: "公式問題集・公式ガイド等官方教材列表（最新卷最接近当前出题倾向）", url: "https://www.iibc-global.org/toeic/lr/study/textbook.html" },
+      { name: "TOEIC 公式アプリ & English Upgrader+", desc: "官方免费 App 和英文学习专栏，听力素材质量极高", url: "https://www.iibc-global.org/toeic/lr/study/app.html" }
+    ]
+  },
+  {
+    cat: "日本主流教材・App", icon: "📚", items: [
+      { name: "『公式TOEIC Listening & Reading 問題集』", desc: "ETS 授权真题集，备考必备；建议从最新卷开始做", url: "https://www.iibc-global.org/toeic/lr/study/textbook.html" },
+      { name: "『金のフレーズ』（TEX 加藤）", desc: "托业单词书销量王者，按分数段（600→730→860→990）编排，配合 abceed 电子版刷更高效", url: "https://www.amazon.co.jp/s?k=TOEIC+L%26R+%E9%87%91%E3%81%AE%E3%83%95%E3%83%AC%E3%83%BC%E3%82%BA" },
+      { name: "『TOEIC L&R テスト 文法問題でる1000問』", desc: "Part 5 语法刷题神器，1000 题按语法点分类", url: "https://www.amazon.co.jp/s?k=TOEIC+%E6%96%87%E6%B3%95%E5%95%8F%E9%A1%8C%E3%81%A7%E3%82%8B1000%E5%95%8F" },
+      { name: "abceed（AI TOEIC 対策）", desc: "日本最流行的 TOEIC AI 刷题 App，自动分析弱点，免费版够用", url: "https://abceed.com/" },
+      { name: "Santa アルク", desc: "词汇诊断 App：10 分钟测出词汇量水平和预计分数", url: "https://www.alc.co.jp/santa/" },
+      { name: "スタディサプリENGLISH TOEIC対策", desc: "视频讲解 + 刷题，适合需要系统讲课感的考生（付费）", url: "https://eikaiwa.studysapuri.jp/" }
+    ]
+  },
+  {
+    cat: "视频 & 中文资源", icon: "🎬", items: [
+      { name: "知乎：托业备考资料推荐与经验分享", desc: "中文考生的完整备考路径和资料清单", url: "https://zhuanlan.zhihu.com/p/446419873" },
+      { name: "知乎：21 天达成托业 900+ 经验帖", desc: "高分刷题方法论，含各题型技巧", url: "https://zhuanlan.zhihu.com/p/68061632" },
+      { name: "B 站：新托业考试精讲（目标 800 分）", desc: "中文系统讲解课程，适合入门建立框架", url: "https://www.bilibili.com/video/BV1Sa8oeVEYp/" },
+      { name: "ETS 官方（全球）", desc: "出题方 ETS 官网，了解评分原理和官方样题", url: "https://www.ets.org/toeic.html" }
+    ]
+  }
+];
+
+/* ============ 日本报名信息 ============ */
+const JAPAN_INFO = [
+  { k: "主办方", v: "IIBC（国際ビジネスコミュニケーション協会），ETS 授权的日本唯一官方运营机构" },
+  { k: "考试类型", v: "公開テスト（个人报名，全年约 10 次，多在周日，上/下午两场）与 IP テスト（公司/学校团体）" },
+  { k: "受験料", v: "公开考试 L&R 约 7,810 日元（含税；最新价格以官网为准）" },
+  { k: "报名方式", v: "官网注册 My Account → 选择考试日期和会场 → 信用卡/便利店缴费 → 打印受験票" },
+  { k: "成绩发布", v: "网上约 17 天后可查分，正式证书（Official Score Certificate）随后邮寄" },
+  { k: "考试当天", v: "需携带受験票 + 带照片证件；只能用铅笔/自动铅笔涂卡；开考前手机必须关机存放" }
+];
+
+</script>
+<script>
+/* TOEIC 高分学习助手 - 主程序 */
+"use strict";
+
+/* ============ 工具 ============ */
+const $ = (sel, el) => (el || document).querySelector(sel);
+const $ = (sel, el) => Array.from((el || document).querySelectorAll(sel));
+const esc = (s) => String(s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
+const shuffle = (arr) => { const a = arr.slice(); for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; };
+const pad2 = (n) => String(n).padStart(2, "0");
+const todayStr = () => { const d = new Date(); return d.getFullYear() + "-" + pad2(d.getMonth() + 1) + "-" + pad2(d.getDate()); };
+const fmtDate = (ts) => { const d = new Date(ts); return d.getFullYear() + "-" + pad2(d.getMonth() + 1) + "-" + pad2(d.getDate()); };
+const LETTERS = ["A", "B", "C", "D"];
+
+/* ============ 状态与存储 ============ */
+const STORE_KEY = "toeic_app_v1";
+let state = {
+  settings: { rate: 0.95, voiceURI: "", examDate: "", goal: 730 },
+  stats: { answered: 0, correct: 0, days: {} },
+  vocab: {},            // "catId:idx" -> {box, ts}
+  wrongbook: [],        // {pool, idx, qIdx, ts}
+  mockHistory: []
+};
+function saveState() {
+  try { localStorage.setItem(STORE_KEY, JSON.stringify(state)); } catch (e) { /* file:// 或隐私模式 */ }
+}
+function loadState() {
+  try {
+    const raw = localStorage.getItem(STORE_KEY);
+    if (raw) state = Object.assign(state, JSON.parse(raw));
+  } catch (e) { }
+}
+loadState();
+
+const POOL_LABEL = { p1: "Part 1 照片", p2: "Part 2 问答", p3: "Part 3 对话", p4: "Part 4 短文", p5: "Part 5 填空", p6: "Part 6 长文", p7: "Part 7 阅读" };
+const ALL_POOLS = { p1: P1_DATA, p2: P2_DATA, p3: P3_DATA, p4: P4_DATA, p5: P5_DATA, p6: P6_DATA, p7: P7_DATA };
+
+function getQuestion(pool, idx, qIdx) {
+  const d = ALL_POOLS[pool][idx];
+  if (pool === "p6") return d.blanks[qIdx];
+  if (pool === "p3" || pool === "p4" || pool === "p7") return d.questions[qIdx];
+  return d; // p1 / p2 / p5 数据本身就是一题
+}
+function getQuestionText(pool, idx, qIdx) {
+  const d = ALL_POOLS[pool][idx];
+  if (pool === "p5") return d.q;
+  if (pool === "p6") return "（第 " + (qIdx + 1) + " 空）" + d.title;
+  return d.questions[qIdx].q;
+}
+
+/* 记录一次作答 */
+function recordAnswer(isCorrect, wrongEntry) {
+  state.stats.answered++;
+  if (isCorrect) state.stats.correct++;
+  const t = todayStr();
+  state.stats.days[t] = (state.stats.days[t] || 0) + 1;
+  if (!isCorrect && wrongEntry) addWrong(wrongEntry);
+  saveState();
+}
+function addWrong(entry) {
+  const key = (e) => e.pool + ":" + e.idx + ":" + e.qIdx;
+  if (!state.wrongbook.some((e) => key(e) === key(entry))) {
+    state.wrongbook.push(Object.assign({ ts: Date.now() }, entry));
+  }
+}
+
+/* ============ 打卡/统计 ============ */
+function calcStreak() {
+  let streak = 0;
+  const d = new Date();
+  if (!state.stats.days[todayStr()]) d.setDate(d.getDate() - 1); // 今天还没练则从昨天起算
+  while (state.stats.days[fmtDate(d)]) { streak++; d.setDate(d.getDate() - 1); }
+  return streak;
+}
+function masteredCount() {
+  return Object.values(state.vocab).filter((v) => v.box >= 4).length;
+}
+const TOTAL_WORDS = VOCAB_DATA.reduce((n, c) => n + c.words.length, 0);
+
+/* ============ TTS 朗读 ============ */
+let VOICES = [];
+function initVoices() {
+  if (!("speechSynthesis" in window)) return;
+  const fill = () => {
+    VOICES = speechSynthesis.getVoices().filter((v) => v.lang && v.lang.toLowerCase().startsWith("en"));
+    const sel = $("#voiceSelect");
+    if (sel) {
+      sel.innerHTML = VOICES.map((v) => `<option value="${esc(v.voiceURI)}">${esc(v.name)} (${esc(v.lang)})</option>`).join("") || "<option>（未找到英语语音）</option>";
+      if (state.settings.voiceURI) sel.value = state.settings.voiceURI;
+    }
+  };
+  fill();
+  speechSynthesis.onvoiceschanged = fill;
+}
+function speakList(items) {
+  // items: [{text, onstart?}]
+  if (!("speechSynthesis" in window)) { alert("当前浏览器不支持语音朗读，请使用 Chrome / Edge / Safari"); return; }
+  speechSynthesis.cancel();
+  const voice = VOICES.find((v) => v.voiceURI === state.settings.voiceURI);
+  items.forEach((it) => {
+    const u = new SpeechSynthesisUtterance(it.text);
+    u.lang = "en-US";
+    u.rate = state.settings.rate;
+    if (voice) u.voice = voice;
+    if (it.onstart) u.onstart = it.onstart;
+    speechSynthesis.speak(u);
+  });
+}
+function stopSpeak() { try { speechSynthesis.cancel(); } catch (e) { } }
+
+/* ============ 词汇 SRS ============ */
+const SRS_DAYS = [0, 1, 2, 4, 8, 15]; // box 0-5 对应间隔天数
+function vKey(catId, i) { return catId + ":" + i; }
+function isDue(rec) {
+  if (!rec) return true;
+  return Date.now() - rec.ts >= SRS_DAYS[Math.min(rec.box, 5)] * 86400000;
+}
+function dueWords(catId) {
+  const out = [];
+  VOCAB_DATA.forEach((cat) => {
+    if (catId && catId !== "all" && cat.id !== catId) return;
+    cat.words.forEach((w, i) => {
+      if (isDue(state.vocab[vKey(cat.id, i)])) out.push({ cat: cat, i: i, w: w });
+    });
+  });
+  return out;
+}
+function updateVocab(catId, i, correct) {
+  const k = vKey(catId, i);
+  const rec = state.vocab[k] || { box: 0, ts: 0 };
+  rec.box = correct ? Math.min(rec.box + 1, 5) : 0;
+  rec.ts = Date.now();
+  state.vocab[k] = rec;
+  recordAnswer(correct);
+}
+
+/* ============ 路由 ============ */
+const NAV = [
+  ["dashboard", "🏠 首页"],
+  ["vocab", "📖 词汇"],
+  ["listening", "🎧 听力"],
+  ["reading", "📖 阅读"],
+  ["mock", "⏱️ 模拟考试"],
+  ["wrong", "❌ 错题本"],
+  ["guide", "📌 备考指南"]
+];
+let currentView = "dashboard";
+function go(view) {
+  stopSpeak();
+  currentView = view;
+  $(".nav-btn").forEach((b) => b.classList.toggle("active", b.dataset.view === view));
+  const fn = { dashboard: renderDashboard, vocab: renderVocab, listening: renderListening, reading: renderReading, mock: renderMock, wrong: renderWrong, guide: renderGuide }[view];
+  $("#view").innerHTML = "";
+  fn($("#view"));
+  window.scrollTo(0, 0);
+}
+
+/* ============ 首页 ============ */
+function renderDashboard(root) {
+  const s = state.stats;
+  const acc = s.answered ? Math.round((s.correct / s.answered) * 100) : 0;
+  const daysLeft = state.settings.examDate ? Math.ceil((new Date(state.settings.examDate + "T09:00:00") - new Date()) / 86400000) : null;
+  root.innerHTML = `
+  <div class="hero">
+    <h1>TOEIC 高分学习助手</h1>
+    <p>词汇 · 听力 · 阅读 · 模考 · 错题本 —— 系统训练，目标高分</p>
+  </div>
+  <div class="grid grid-3">
+    <div class="card">
+      <h3>🎯 考试信息</h3>
+      <label class="lbl">考试日期</label>
+      <input type="date" id="examDate" value="${esc(state.settings.examDate)}">
+      <label class="lbl">目标分数</label>
+      <select id="goalSel">${[600, 730, 785, 860, 900].map((g) => `<option value="${g}" ${state.settings.goal == g ? "selected" : ""}>${g} 分</option>`).join("")}</select>
+      <div class="countdown ${daysLeft !== null && daysLeft < 0 ? "over" : ""}">${daysLeft === null ? "设置日期开始倒计时" : daysLeft >= 0 ? "距离考试还有 <b>" + daysLeft + "</b> 天" : "考试已结束，设置新目标吧"}</div>
+      ${daysLeft !== null && daysLeft >= 0 ? `<div class="muted">目标 ${state.settings.goal} 分 ≈ 200 题中需答对约 ${Math.round(state.settings.goal / 990 * 200)} 题（官方换算为非线性，仅供参考）</div>` : ""}
+    </div>
+    <div class="card">
+      <h3>📊 学习进度</h3>
+      <div class="stat-row"><span>今日已练</span><b>${s.days[todayStr()] || 0} 题</b></div>
+      <div class="stat-row"><span>连续打卡</span><b>${calcStreak()} 天</b></div>
+      <div class="stat-row"><span>累计正确率</span><b>${acc}%</b> <span class="muted">(${s.correct}/${s.answered})</span></div>
+      <div class="stat-row"><span>已掌握词汇</span><b>${masteredCount()} / ${TOTAL_WORDS}</b></div>
+      <div class="progress"><div style="width:${Math.round(masteredCount() / TOTAL_WORDS * 100)}%"></div></div>
+    </div>
+    <div class="card">
+      <h3>⚡ 快速开始</h3>
+      <button class="btn big" data-go="vocab">背今天到期的单词（${dueWords("all").length} 个）</button>
+      <button class="btn big" data-go="listening">练听力（TTS 朗读）</button>
+      <button class="btn big" data-go="reading">刷阅读题</button>
+      <button class="btn big" data-go="mock">做一次快速模考</button>
+    </div>
+  </div>
+  <div class="card">
+    <h3>🏆 模考记录</h3>
+    ${state.mockHistory.length ? `<table class="tbl"><tr><th>日期</th><th>听力</th><th>阅读</th><th>合计（估算）</th></tr>
+      ${state.mockHistory.slice(-5).reverse().map((m) => `<tr><td>${m.date}</td><td>${m.lC}/${m.lT}</td><td>${m.rC}/${m.rT}</td><td><b>${scoreEst(m.lC, m.lT) + scoreEst(m.rC, m.rT)}</b></td></tr>`).join("")}
+    </table>` : `<p class="muted">还没有模考记录。建议每周做 1-2 次快速模考检验进度。</p>`}
+  </div>
+  <div class="card">
+    <h3>⚙️ 语音设置</h3>
+    <label class="lbl">朗读速度 <span id="rateVal">${state.settings.rate}</span> 倍</label>
+    <input type="range" id="rateRange" min="0.6" max="1.2" step="0.05" value="${state.settings.rate}">
+    <label class="lbl">英语语音</label>
+    <select id="voiceSelect"></select>
+    <p class="muted">听力练习使用浏览器自带语音合成（TTS）朗读，无需音频文件。建议选用 en-US 英式/美式人声。</p>
+    <button class="btn" id="testSpeakBtn">试听：TOEIC test, Part Three. Listen to the conversation.</button>
+    <button class="btn danger" id="resetBtn" style="margin-left:8px">清空全部学习数据</button>
+  </div>
+  <div class="card note">
+    <h3>💡 小贴士：托业（TOEIC）≠ 托福（TOEFL）</h3>
+    <p>TOEIC 考察<b>职场与商务英语</b>（日本求职・晋升最常用，满分 990）；TOEFL 考察<b>学术英语</b>（留学用，满分 120）。本软件按你「在日本考托业」的情况定制。如果之后也要考托福，可以在此基础上扩展。</p>
+  </div>`;
+  $("#examDate").addEventListener("change", (e) => { state.settings.examDate = e.target.value; saveState(); renderDashboard(root); });
+  $("#goalSel").addEventListener("change", (e) => { state.settings.goal = +e.target.value; saveState(); renderDashboard(root); });
+  $("#rateRange").addEventListener("input", (e) => { state.settings.rate = +e.target.value; $("#rateVal").textContent = e.target.value; saveState(); });
+  $("#voiceSelect").addEventListener("change", (e) => { state.settings.voiceURI = e.target.value; saveState(); });
+  $("#testSpeakBtn").addEventListener("click", () => speakList([{ text: "TOEIC test, Part Three. Listen to the conversation. Then, choose the best answer to each question." }]));
+  $("#resetBtn").addEventListener("click", () => {
+    if (confirm("确定清空所有学习记录吗？此操作不可恢复。")) { state = { settings: state.settings, stats: { answered: 0, correct: 0, days: {} }, vocab: {}, wrongbook: [], mockHistory: [] }; saveState(); renderDashboard(root); }
+  });
+  $("[data-go]", root).forEach((b) => b.addEventListener("click", () => go(b.dataset.go)));
+  initVoices();
+}
+function scoreEst(c, t) { return t ? Math.round(c / t * 495 / 5) * 5 : 0; }
+
+/* ============ 词汇页 ============ */
+let vocabSession = null; // {mode, list, i, correctCount}
+function renderVocab(root) {
+  root.innerHTML = `
+  <div class="page-head"><h1>📖 词汇训练</h1><p class="muted">基于间隔重复算法（SRS）：记住的词间隔变长，忘记的词很快再现。共 ${TOTAL_WORDS} 词。</p></div>
+  <div class="card">
+    <label class="lbl">选择分类</label>
+    <div class="chips" id="catChips">
+      ${[`<button class="chip active" data-cat="all">全部（${dueWords("all").length} 到期）</button>`].concat(VOCAB_DATA.map((c) => `<button class="chip" data-cat="${c.id}">${c.icon} ${c.name}（${dueWords(c.id).length}）</button>`)).join("")}
+    </div>
+    <div style="margin-top:12px">
+      <button class="btn big" id="learnBtn">📇 闪卡学习</button>
+      <button class="btn big" id="quizBtn">✅ 选择测验</button>
+      <span class="muted" style="margin-left:8px">建议先闪卡再测验，每次 10 词</span>
+    </div>
+  </div>
+  <div id="vocabArea"></div>`;
+  let catId = "all";
+  $("#catChips .chip", root).forEach((ch) => ch.addEventListener("click", () => {
+    $("#catChips .chip", root).forEach((c) => c.classList.remove("active"));
+    ch.classList.add("active"); catId = ch.dataset.cat;
+  }));
+  $("#learnBtn").addEventListener("click", () => startVocab("learn", catId));
+  $("#quizBtn").addEventListener("click", () => startVocab("quiz", catId));
+}
+function startVocab(mode, catId) {
+  let list = dueWords(catId);
+  if (!list.length) { $("#vocabArea").innerHTML = `<div class="card note">🎉 该分类当前没有到期词汇！可以切换其他分类，或明天再来复习（SRS 会安排间隔复习）。</div>`; return; }
+  list = shuffle(list).slice(0, 10);
+  vocabSession = { mode: mode, list: list, i: 0, correct: 0 };
+  nextVocabCard();
+}
+function nextVocabCard() {
+  const sess = vocabSession, area = $("#vocabArea");
+  if (sess.i >= sess.list.length) {
+    area.innerHTML = `<div class="card"><h3>${sess.mode === "quiz" ? "✅" : "📇"} 本轮完成！</h3>
+      <p>正确 ${sess.correct} / ${sess.list.length}。记住的词下次复习间隔会变长，忘记的词会很快重现。</p>
+      <button class="btn" onclick="startVocab('${sess.mode}','all')">再来一轮</button></div>`;
+    return;
+  }
+  const item = sess.list[sess.i];
+  const catName = item.cat.name;
+  if (sess.mode === "learn") {
+    area.innerHTML = `
+    <div class="card flashcard">
+      <div class="fc-meta">${catName} · 第 ${sess.i + 1} / ${sess.list.length} 个</div>
+      <div class="fc-word">${esc(item.w.w)} <button class="icon-btn" id="fcSpeak">🔊</button> <span class="fc-pos">${esc(item.w.p)}</span></div>
+      <div class="fc-meaning" id="fcMeaning" style="visibility:hidden">
+        <div class="fc-zh">${esc(item.w.zh)}</div>
+        <div class="fc-ex">${esc(item.w.ex)}</div>
+      </div>
+      <div class="btn-row">
+        <button class="btn" id="fcShow">显示释义</button>
+        <button class="btn good" id="fcYes" disabled>😀 记住了</button>
+        <button class="btn bad" id="fcNo" disabled>😥 没记住</button>
+      </div>
+    </div>`;
+    $("#fcSpeak").addEventListener("click", () => speakList([{ text: item.w.w }]));
+    $("#fcShow").addEventListener("click", () => { $("#fcMeaning").style.visibility = "visible"; $("#fcShow").disabled = true; $("#fcYes").disabled = false; $("#fcNo").disabled = false; speakList([{ text: item.w.w + ". " + item.w.ex }]); });
+    $("#fcYes").addEventListener("click", () => { updateVocab(item.cat.id, item.i, true); sess.correct++; sess.i++; nextVocabCard(); });
+    $("#fcNo").addEventListener("click", () => { updateVocab(item.cat.id, item.i, false); sess.i++; nextVocabCard(); });
+  } else {
+    const wrongPool = shuffle(VOCAB_DATA.reduce((a, c) => a.concat(c.words.filter((w) => w.zh !== item.w.zh)), [])).slice(0, 3).map((w) => w.zh);
+    const opts = shuffle([item.w.zh].concat(wrongPool));
+    area.innerHTML = `
+    <div class="card flashcard">
+      <div class="fc-meta">${catName} · 第 ${sess.i + 1} / ${sess.list.length} 题</div>
+      <div class="fc-word">${esc(item.w.w)} <button class="icon-btn" id="qSpeak">🔊</button></div>
+      <div id="qOpts">${opts.map((o, k) => `<button class="opt" data-ok="${o === item.w.zh ? 1 : 0}">${esc(o)}</button>`).join("")}</div>
+      <div id="qFeed"></div>
+      <button class="btn" id="qNext" style="display:none">下一题 →</button>
+    </div>`;
+    $("#qSpeak").addEventListener("click", () => speakList([{ text: item.w.w }]));
+    $("#qOpts .opt").forEach((b) => b.addEventListener("click", () => {
+      const ok = b.dataset.ok === "1";
+      $("#qOpts .opt").forEach((x, k) => { x.disabled = true; if (x.dataset.ok === "1") x.classList.add("correct"); });
+      if (!ok) b.classList.add("wrong"); else sess.correct++;
+      $("#qFeed").innerHTML = `<div class="explain"><b>${esc(item.w.zh)}</b><br>${esc(item.w.ex)}</div>`;
+      $("#qNext").style.display = "inline-block";
+      updateVocab(item.cat.id, item.i, ok);
+    }));
+    $("#qNext").addEventListener("click", () => { sess.i++; nextVocabCard(); });
+  }
+}
+
+/* ============ 听力页 ============ */
+let listenSession = null;
+const LISTEN_PARTS = [
+  ["p1", "Part 1 · 照片描述", "6 题", "听 4 句描述选最符合的"],
+  ["p2", "Part 2 · 应答", "20 题", "听问题选最佳回应（3 选 1）"],
+  ["p3", "Part 3 · 对话", "8 组 × 3 题", "先读题再听对话"],
+  ["p4", "Part 4 · 短文", "6 篇 × 3 题", "广播、留言、广告等独白"]
+];
+function renderListening(root) {
+  root.innerHTML = `
+  <div class="page-head"><h1>🎧 听力训练</h1><p class="muted">用 TTS 朗读题目，请先看题再点播放（贴近真实考试节奏）。Part 3/4 的原文在答完 3 题后显示。</p></div>
+  <div class="card">
+    <div class="chips" id="lParts">${LISTEN_PARTS.map((p, i) => `<button class="chip ${i === 0 ? "active" : ""}" data-part="${p[0]}">${p[1]}（${p[2]}）</button>`).join("")}</div>
+    <p class="muted" id="lPartDesc"></p>
+    <button class="btn big" id="lStart">开始练习</button>
+  </div>
+  <div id="lArea"></div>`;
+  let part = "p1";
+  const desc = () => $("#lPartDesc").textContent = LISTEN_PARTS.find((p) => p[0] === part)[3];
+  desc();
+  $("#lParts .chip", root).forEach((ch) => ch.addEventListener("click", () => { $("#lParts .chip", root).forEach((c) => c.classList.remove("active")); ch.classList.add("active"); part = ch.dataset.part; desc(); }));
+  $("#lStart").addEventListener("click", () => startListening(part));
+}
+function startListening(part) {
+  let items;
+  if (part === "p1" || part === "p2") items = shuffle(ALL_POOLS[part].map((d, i) => ({ pool: part, idx: i })));
+  else items = shuffle(ALL_POOLS[part].map((d, i) => ({ pool: part, idx: i }))).slice(0, 4); // P3/P4 每次练 4 组
+  listenSession = { part: part, items: items, i: 0 };
+  renderListenItem();
+}
+function renderListenItem() {
+  const sess = listenSession, area = $("#lArea");
+  if (sess.i >= sess.items.length) { area.innerHTML = `<div class="card"><h3>🎉 本组练习完成！</h3><button class="btn" onclick="startListening('${sess.part}')">再来一组</button></div>`; return; }
+  const it = sess.items[sess.i], d = ALL_POOLS[sess.part][it.idx];
+  if (sess.part === "p1") {
+    area.innerHTML = `
+    <div class="card">
+      <div class="fc-meta">Part 1 · 第 ${sess.i + 1} / ${sess.items.length} 题 <button class="btn sm" id="lpPlay">🔊 播放四个选项</button></div>
+      <div class="photo-box">📷 照片场景：${esc(d.scene)}</div>
+      <div id="lpChoices">${d.choices.map((c, k) => `<button class="opt" data-k="${k}"><b>${LETTERS[k]}.</b> ${esc(c)}</button>`).join("")}</div>
+      <div id="lpFeed"></div>
+    </div>`;
+    $("#lpPlay").addEventListener("click", () => speakList(d.choices.map((c, k) => ({ text: c, onstart: () => { $("#lpChoices .opt").forEach((x, j) => x.classList.toggle("speaking", j === k)); } }))));
+    $("#lpChoices .opt").forEach((b) => b.addEventListener("click", () => answerChoice("p1", it.idx, null, +b.dataset.k, b, "lpChoices", "lpFeed", () => { })));
+  } else if (sess.part === "p2") {
+    area.innerHTML = `
+    <div class="card">
+      <div class="fc-meta">Part 2 · 第 ${sess.i + 1} / ${sess.items.length} 题 <button class="btn sm" id="lpPlay">🔊 播放问题</button></div>
+      <div id="lpChoices">${d.choices.map((c, k) => `<button class="opt" data-k="${k}"><b>${LETTERS[k]}.</b> ${esc(c)}</button>`).join("")}</div>
+      <div id="lpFeed"></div>
+    </div>`;
+    $("#lpPlay").addEventListener("click", () => speakList([{ text: d.q }]));
+    $("#lpChoices .opt").forEach((b) => b.addEventListener("click", () => answerChoice("p2", it.idx, null, +b.dataset.k, b, "lpChoices", "lpFeed", () => { })));
+  } else {
+    const qs = d.questions;
+    area.innerHTML = `
+    <div class="card">
+      <div class="fc-meta">${esc(d.title)} · 第 ${sess.i + 1} / ${sess.items.length} 组 <button class="btn sm" id="lpPlay">🔊 播放${sess.part === "p3" ? "对话" : "短文"}</button></div>
+      <p class="muted">先快速阅读下面 3 个问题和选项，再点播放（只播一遍，模拟考场）。</p>
+      <div id="lpQs">${qs.map((q, qi) => `
+        <div class="q-block">
+          <div class="q-text">${(sess.part === "p3" ? 32 : 71) + sess.i * 3 + qi}. ${esc(q.q)}</div>
+          <div class="q-choices" id="qc${qi}">${q.choices.map((c, k) => `<button class="opt" data-k="${k}"><b>${LETTERS[k]}.</b> ${esc(c)}</button>`).join("")}</div>
+          <div class="q-feed" id="qf${qi}"></div>
+        </div>`).join("")}</div>
+      <div id="lpTranscript" style="display:none" class="transcript">${d.script.map((l) => "<p>" + esc(l) + "</p>").join("")}</div>
+    </div>`;
+    $("#lpPlay").addEventListener("click", () => speakList(d.script.map((l) => ({ text: l }))));
+    let answered = 0;
+    qs.forEach((q, qi) => {
+      $("#qc" + qi + " .opt").forEach((b) => b.addEventListener("click", () => {
+        if (b.disabled) return;
+        answerChoice(sess.part, it.idx, qi, +b.dataset.k, b, "qc" + qi, "qf" + qi, null);
+        answered++;
+        if (answered === qs.length) $("#lpTranscript").style.display = "block";
+      }));
+    });
+  }
+  const navRow = document.createElement("div");
+  navRow.className = "btn-row"; navRow.style.marginTop = "10px";
+  navRow.innerHTML = `<button class="btn" id="lNext">${sess.i + 1 >= sess.items.length ? "完成 →" : "下一题 →"}</button>`;
+  area.firstElementChild.appendChild(navRow);
+  $("#lNext").addEventListener("click", () => { sess.i++; renderListenItem(); });
+}
+/* 通用判题（P1/P2/P5 或 P3/P4/P6/P7 的子题） */
+function answerChoice(pool, idx, qIdx, choice, btn, choicesSel, feedSel, onDone) {
+  const q = getQuestion(pool, idx, qIdx);
+  const ok = choice === q.answer;
+  $("#" + choicesSel + " .opt").forEach((x, k) => {
+    x.disabled = true;
+    if (k === q.answer) x.classList.add("correct");
+  });
+  if (!ok) btn.classList.add("wrong");
+  $("#" + feedSel).innerHTML = `<div class="explain">${ok ? "✅ 正确！" : "❌ 正确答案：" + LETTERS[q.answer] + "。"} ${esc(q.explain || "")}</div>`;
+  recordAnswer(ok, ok ? null : { pool: pool, idx: idx, qIdx: qIdx === null ? 0 : qIdx });
+  if (onDone) onDone(ok);
+}
+
+/* ============ 阅读页 ============ */
+let readSession = null;
+const READ_PARTS = [
+  ["p5", "Part 5 · 短文填空", "30 题", "语法与词汇，目标 20-30 秒/题"],
+  ["p6", "Part 6 · 长文填空", "4 篇 × 4 空", "结合上下文选词"],
+  ["p7", "Part 7 · 阅读理解", "5 单篇 + 2 双篇", "先读题干再回原文定位"]
+];
+function renderReading(root) {
+  root.innerHTML = `
+  <div class="page-head"><h1>📖 阅读训练</h1><p class="muted">做题时留意每题的语法考点标签，错题自动进入错题本。</p></div>
+  <div class="card">
+    <div class="chips" id="rParts">${READ_PARTS.map((p, i) => `<button class="chip ${i === 0 ? "active" : ""}" data-part="${p[0]}">${p[1]}（${p[2]}）</button>`).join("")}</div>
+    <p class="muted" id="rPartDesc"></p>
+    <button class="btn big" id="rStart">开始练习</button>
+  </div>
+  <div id="rArea"></div>`;
+  let part = "p5";
+  const desc = () => $("#rPartDesc").textContent = READ_PARTS.find((p) => p[0] === part)[3];
+  desc();
+  $("#rParts .chip", root).forEach((ch) => ch.addEventListener("click", () => { $("#rParts .chip", root).forEach((c) => c.classList.remove("active")); ch.classList.add("active"); part = ch.dataset.part; desc(); }));
+  $("#rStart").addEventListener("click", () => startReading(part));
+}
+function startReading(part) {
+  const items = part === "p5" ? shuffle(ALL_POOLS.p5.map((d, i) => ({ pool: "p5", idx: i }))).slice(0, 10)
+    : shuffle(ALL_POOLS[part].map((d, i) => ({ pool: part, idx: i }))).slice(0, 2);
+  readSession = { part: part, items: items, i: 0 };
+  renderReadItem();
+}
+function renderReadItem() {
+  const sess = readSession, area = $("#rArea");
+  if (sess.i >= sess.items.length) { area.innerHTML = `<div class="card"><h3>🎉 本组练习完成！</h3><button class="btn" onclick="startReading('${sess.part}')">再来一组</button></div>`; return; }
+  const it = sess.items[sess.i], d = ALL_POOLS[sess.part][it.idx];
+  if (sess.part === "p5") {
+    area.innerHTML = `
+    <div class="card">
+      <div class="fc-meta">Part 5 · 第 ${sess.i + 1} / ${sess.items.length} 题</div>
+      <div class="q-text">${esc(d.q)}</div>
+      <div id="rpChoices">${d.choices.map((c, k) => `<button class="opt" data-k="${k}"><b>${LETTERS[k]}.</b> ${esc(c)}</button>`).join("")}</div>
+      <div id="rpFeed"></div>
+      <div class="btn-row" style="margin-top:10px"><button class="btn" id="rNext">${sess.i + 1 >= sess.items.length ? "完成 →" : "下一题 →"}</button></div>
+    </div>`;
+    $("#rpChoices .opt").forEach((b) => b.addEventListener("click", () => answerChoice("p5", it.idx, null, +b.dataset.k, b, "rpChoices", "rpFeed", null)));
+  } else if (sess.part === "p6") {
+    area.innerHTML = `
+    <div class="card">
+      <div class="fc-meta">Part 6 · ${esc(d.title)}（第 ${sess.i + 1} / ${sess.items.length} 篇）</div>
+      <div class="passage">${d.lines.map((l) => (l ? "<p>" + esc(l) + "</p>" : "<p>&nbsp;</p>")).join("")}</div>
+      <div id="rpBlanks">${d.blanks.map((b, bi) => `
+        <div class="q-block"><div class="q-text">第 ${bi + 1} 空</div>
+        <div class="q-choices" id="pc${bi}">${b.choices.map((c, k) => `<button class="opt" data-k="${k}"><b>${LETTERS[k]}.</b> ${esc(c)}</button>`).join("")}</div>
+        <div class="q-feed" id="pf${bi}"></div></div>`).join("")}</div>
+      <div class="btn-row" style="margin-top:10px"><button class="btn" id="rNext">${sess.i + 1 >= sess.items.length ? "完成 →" : "下一篇 →"}</button></div>
+    </div>`;
+    d.blanks.forEach((b, bi) => $("#pc" + bi + " .opt").forEach((btn) => btn.addEventListener("click", () => answerChoice("p6", it.idx, bi, +btn.dataset.k, btn, "pc" + bi, "pf" + bi, null))));
+  } else {
+    area.innerHTML = `
+    <div class="card">
+      <div class="fc-meta">Part 7 · ${esc(d.title)}（第 ${sess.i + 1} / ${sess.items.length} 篇）</div>
+      <div class="passage">${d.passages.map((p) => "<p>" + esc(p).replace(/\n/g, "<br>") + "</p><hr>").join("")}</div>
+      <div id="rpQs">${d.questions.map((q, qi) => `
+        <div class="q-block"><div class="q-text">${esc(q.q)}</div>
+        <div class="q-choices" id="tc${qi}">${q.choices.map((c, k) => `<button class="opt" data-k="${k}"><b>${LETTERS[k]}.</b> ${esc(c)}</button>`).join("")}</div>
+        <div class="q-feed" id="tf${qi}"></div></div>`).join("")}</div>
+      <div class="btn-row" style="margin-top:10px"><button class="btn" id="rNext">${sess.i + 1 >= sess.items.length ? "完成 →" : "下一篇 →"}</button></div>
+    </div>`;
+    d.questions.forEach((q, qi) => $("#tc" + qi + " .opt").forEach((btn) => btn.addEventListener("click", () => answerChoice("p7", it.idx, qi, +btn.dataset.k, btn, "tc" + qi, "tf" + qi, null))));
+  }
+  $("#rNext").addEventListener("click", () => { sess.i++; renderReadItem(); });
+}
+
+/* ============ 模拟考试 ============ */
+let mock = null;
+function renderMock(root) {
+  root.innerHTML = `
+  <div class="page-head"><h1>⏱️ 模拟考试</h1><p class="muted">从题库随机抽题组卷，严格计时。成绩为按比例折算的<b>估算分</b>，仅供参考趋势。</p></div>
+  <div class="grid grid-2">
+    <div class="card"><h3>🎯 快速模考</h3><p>听力 22 题 + 阅读 26 题<br>限时 45 分钟</p><button class="btn big" data-m="quick">开始</button></div>
+    <div class="card"><h3>🎧 听力专项</h3><p>Part 1-4 共 22 题<br>限时 25 分钟</p><button class="btn big" data-m="listen">开始</button></div>
+    <div class="card"><h3>📖 阅读专项</h3><p>Part 5-7 共 26 题<br>限时 30 分钟</p><button class="btn big" data-m="read">开始</button></div>
+    <div class="card note"><h3>ℹ️ 说明</h3><p>· 每部分从题库随机抽取，多刷几套覆盖面更广<br>· 听力每段只播一遍（可点重播按钮）<br>· 估算分 = 正确率 × 495（实际官方换算为非线性）</p></div>
+  </div>`;
+  $("[data-m]", root).forEach((b) => b.addEventListener("click", () => startMock(b.dataset.m)));
+}
+function buildMockItems(kind) {
+  const pick = (pool, n) => shuffle(ALL_POOLS[pool].map((_, i) => ({ pool: pool, idx: i }))).slice(0, n);
+  let L = [], R = [];
+  if (kind !== "read") { L = [].concat(pick("p1", 2), pick("p2", 8), pick("p3", 2), pick("p4", 2)); }
+  if (kind !== "listen") {
+    const singles = ALL_POOLS.p7.map((d, i) => ({ pool: "p7", idx: i })).filter((x) => !ALL_POOLS.p7[x.idx].double);
+    const doubles = ALL_POOLS.p7.map((d, i) => ({ pool: "p7", idx: i })).filter((x) => ALL_POOLS.p7[x.idx].double);
+    R = [].concat(pick("p5", 15), pick("p6", 1), shuffle(singles).slice(0, 1), shuffle(doubles).slice(0, 1));
+  }
+  return { L: L, R: R, minutes: kind === "quick" ? 45 : kind === "listen" ? 25 : 30 };
+}
+function startMock(kind) {
+  const built = buildMockItems(kind);
+  mock = { kind: kind, L: built.L, R: built.R, i: 0, answers: {}, endAt: Date.now() + built.minutes * 60000, list: [].concat(built.L, built.R) };
+  renderMockItem();
+  mock.timer = setInterval(() => {
+    const left = mock.endAt - Date.now();
+    const el = $("#mockTimer");
+    if (!el) return clearInterval(mock.timer);
+    if (left <= 0) { clearInterval(mock.timer); alert("时间到！自动交卷"); finishMock(); return; }
+    el.textContent = pad2(Math.floor(left / 60000)) + ":" + pad2(Math.floor(left % 60000 / 1000));
+  }, 500);
+}
+function mockGroupQCount(it) {
+  const d = ALL_POOLS[it.pool][it.idx];
+  if (it.pool === "p1" || it.pool === "p2" || it.pool === "p5") return 1;
+  if (it.pool === "p6") return 4;
+  return d.questions.length;
+}
+function renderMockItem() {
+  const area = $("#view");
+  if (mock.i >= mock.list.length) return finishMock();
+  const it = mock.list[mock.i];
+  const isListen = mock.i < mock.L.length;
+  const d = ALL_POOLS[it.pool][it.idx];
+  let body = "";
+  if (it.pool === "p1") {
+    body = `<div class="photo-box">📷 照片场景：${esc(d.scene)}</div>
+      <div id="mkc0">${d.choices.map((c, k) => `<button class="opt" data-k="${k}"><b>${LETTERS[k]}.</b> ${esc(c)}</button>`).join("")}</div>
+      <button class="btn sm" id="mkPlay" style="margin-top:8px">🔊 播放选项</button>`;
+  } else if (it.pool === "p2") {
+    body = `<div id="mkc0">${d.choices.map((c, k) => `<button class="opt" data-k="${k}"><b>${LETTERS[k]}.</b> ${esc(c)}</button>`).join("")}</div>
+      <button class="btn sm" id="mkPlay" style="margin-top:8px">🔊 播放问题</button>`;
+  } else if (it.pool === "p5") {
+    body = `<div class="q-text">${esc(d.q)}</div>
+      <div id="mkc0">${d.choices.map((c, k) => `<button class="opt" data-k="${k}"><b>${LETTERS[k]}.</b> ${esc(c)}</button>`).join("")}</div>`;
+  } else if (it.pool === "p6") {
+    body = `<div class="passage">${d.lines.map((l) => (l ? "<p>" + esc(l) + "</p>" : "")).join("")}</div>
+      ${d.blanks.map((b, bi) => `<div class="q-block"><div class="q-text">第 ${bi + 1} 空</div><div class="q-choices" id="mkc${bi}">${b.choices.map((c, k) => `<button class="opt" data-k="${k}"><b>${LETTERS[k]}.</b> ${esc(c)}</button>`).join("")}</div></div>`).join("")}`;
+  } else {
+    body = `${it.pool === "p7" ? `<div class="passage">${d.passages.map((p) => "<p>" + esc(p).replace(/\n/g, "<br>") + "</p><hr>").join("")}</div>` : ""}
+      <div class="fc-meta">${esc(d.title || "")}</div>
+      ${d.questions.map((q, qi) => `<div class="q-block"><div class="q-text">${esc(q.q)}</div><div class="q-choices" id="mkc${qi}">${q.choices.map((c, k) => `<button class="opt" data-k="${k}"><b>${LETTERS[k]}.</b> ${esc(c)}</button>`).join("")}</div></div>`).join("")}
+      ${it.pool === "p3" || it.pool === "p4" ? `<div class="transcript" style="display:none" id="mkScript">${d.script.map((l) => "<p>" + esc(l) + "</p>").join("")}</div><button class="btn sm" id="mkPlay" style="margin-top:8px">🔊 播放${it.pool === "p3" ? "对话" : "短文"}</button>` : ""}`;
+  }
+  area.innerHTML = `
+  <div class="mock-bar">
+    <span>${isListen ? "🎧 听力" : "📖 阅读"} · 第 ${mock.i + 1} / ${mock.list.length} 组</span>
+    <span class="timer" id="mockTimer">--:--</span>
+    <button class="btn sm" id="mkSubmit">交卷</button>
+  </div>
+  <div class="card">${body}
+    <div class="btn-row" style="margin-top:14px">
+      ${mock.i > 0 ? `<button class="btn" id="mkPrev">← 上一组</button>` : ""}
+      <button class="btn" id="mkNext">${mock.i + 1 >= mock.list.length ? "交卷" : "下一组 →"}</button>
+    </div>
+  </div>`;
+  // 播放
+  const playBtn = $("#mkPlay");
+  if (playBtn) playBtn.addEventListener("click", () => {
+    if (it.pool === "p1") speakList(d.choices.map((c) => ({ text: c })));
+    else if (it.pool === "p2") speakList([{ text: d.q }]);
+    else speakList(d.script.map((l) => ({ text: l })));
+  });
+  if (isListen && it.pool === "p1") setTimeout(() => playBtn && playBtn.click(), 300);
+  if (isListen && it.pool === "p2") setTimeout(() => playBtn && playBtn.click(), 300);
+  if (isListen && (it.pool === "p3" || it.pool === "p4")) setTimeout(() => playBtn && playBtn.click(), 300);
+  // 作答
+  const nQ = mockGroupQCount(it);
+  for (let qi = 0; qi < nQ; qi++) {
+    $("#mkc" + qi + " .opt").forEach((b) => b.addEventListener("click", () => {
+      const k = +b.dataset.k;
+      $("#mkc" + qi + " .opt").forEach((x, j) => x.classList.toggle("picked", j === k));
+      mock.answers[it.pool + ":" + it.idx + ":" + qi] = k;
+      if (it.pool === "p3" || it.pool === "p4") { const sc = $("#mkScript"); if (sc) sc.style.display = "block"; }
+    }));
+    if (mock.answers[it.pool + ":" + it.idx + ":" + qi] !== undefined) {
+      $("#mkc" + qi + " .opt")[mock.answers[it.pool + ":" + it.idx + ":" + qi]].classList.add("picked");
+    }
+  }
+  $("#mkNext").addEventListener("click", () => { mock.i++; renderMockItem(); });
+  const prev = $("#mkPrev"); if (prev) prev.addEventListener("click", () => { mock.i--; renderMockItem(); });
+  $("#mkSubmit").addEventListener("click", () => { if (confirm("确定交卷？")) finishMock(); });
+}
+function finishMock() {
+  if (!mock) return;
+  clearInterval(mock.timer);
+  stopSpeak();
+  let lC = 0, lT = 0, rC = 0, rT = 0;
+  mock.L.forEach((it) => { lT += mockGroupQCount(it); });
+  mock.R.forEach((it) => { rT += mockGroupQCount(it); });
+  Object.keys(mock.answers).forEach((key) => {
+    const parts = key.split(":");
+    const pool = parts[0], idx = +parts[1], qi = +parts[2];
+    const q = getQuestion(pool, idx, qi);
+    const correct = mock.answers[key] === q.answer;
+    const isL = ["p1", "p2", "p3", "p4"].includes(pool);
+    if (correct) { isL ? lC++ : rC++; }
+    recordAnswer(correct, correct ? null : { pool: pool, idx: idx, qIdx: qi });
+  });
+  state.mockHistory.push({ date: todayStr(), lC: lC, lT: lT, rC: rC, rT: rT });
+  saveState();
+  const lS = scoreEst(lC, lT), rS = scoreEst(rC, rT);
+  $("#view").innerHTML = `
+  <div class="page-head"><h1>📊 模考成绩</h1><p class="muted">${todayStr()} · 用时 ${Math.max(1, Math.round((Date.now() - (mock.endAt - (mock.kind === "quick" ? 45 : mock.kind === "listen" ? 25 : 30) * 60000)) / 60000))} 分钟（估算分，按正确率折算）</p></div>
+  <div class="grid grid-3">
+    <div class="card center"><div class="score-num">${lS}</div><div class="muted">听力估算（${lC}/${lT}）</div></div>
+    <div class="card center"><div class="score-num">${rS}</div><div class="muted">阅读估算（${rC}/${rT}）</div></div>
+    <div class="card center"><div class="score-num total">${lS + rS}</div><div class="muted">总分估算 / 990</div></div>
+  </div>
+  <div class="card"><h3>错题回顾</h3>
+    ${Object.keys(mock.answers).filter((k) => { const p = k.split(":"); return mock.answers[k] !== getQuestion(p[0], +p[1], +p[2]).answer; }).map((k) => {
+    const p = k.split(":"); const q = getQuestion(p[0], +p[1], +p[2]);
+    return `<div class="q-block"><div class="q-text">【${POOL_LABEL[p[0]]}】${esc(q.q || "")}</div>
+      <div class="explain">你的答案：${LETTERS[mock.answers[k]]} · 正确答案：<b>${LETTERS[q.answer]}</b><br>${esc(q.explain || "")}</div></div>`;
+  }).join("") || `<p class="muted">🎉 全部正确！</p>`}
+  </div>
+  <button class="btn big" onclick="go('mock')">再来一套</button>`;
+  mock = null;
+  window.scrollTo(0, 0);
+}
+
+/* ============ 错题本 ============ */
+function renderWrong(root) {
+  root.innerHTML = `
+  <div class="page-head"><h1>❌ 错题本</h1><p class="muted">做错的题自动收录。重练答对后自动移出；建议每周清空一次错题本。</p></div>
+  <div class="card">
+    <button class="btn big" id="wPractice" ${state.wrongbook.length ? "" : "disabled"}>开始重练（${state.wrongbook.length} 题）</button>
+    <button class="btn danger" id="wClear" ${state.wrongbook.length ? "" : "disabled"}>清空错题本</button>
+  </div>
+  <div id="wArea">
+    ${state.wrongbook.length ? `<div class="card">${state.wrongbook.slice().reverse().map((e, ri) => {
+    const q = getQuestion(e.pool, e.idx, e.qIdx);
+    const d = ALL_POOLS[e.pool][e.idx];
+    return `<details class="wrong-item"><summary>【${POOL_LABEL[e.pool]}】${esc((q.q || d.title || "").slice(0, 60))}</summary>
+        <div class="explain">题目：${esc(q.q || "")}<br>正确答案：<b>${LETTERS[q.answer]}. ${esc(q.choices[q.answer])}</b><br>${esc(q.explain || "")}</div></details>`;
+  }).join("")}</div>` : `<div class="card note">错题本是空的，去刷题吧！错题会自动收录在这里。</div>`}
+  </div>`;
+  if (state.wrongbook.length) {
+    $("#wClear").addEventListener("click", () => { if (confirm("确定清空错题本？")) { state.wrongbook = []; saveState(); renderWrong(root); } });
+    $("#wPractice").addEventListener("click", () => renderWrongPractice(root));
+  }
+}
+function renderWrongPractice(root) {
+  const list = shuffle(state.wrongbook).slice(0, 15);
+  let i = 0, removed = 0;
+  const next = () => {
+    if (i >= list.length) {
+      saveState();
+      $("#wArea").innerHTML = `<div class="card"><h3>🎉 重练完成！</h3><p>答对 ${list.length - removed} / ${list.length}，答对的题已从错题本移出。</p><button class="btn" onclick="go('wrong')">返回错题本</button></div>`;
+      return;
+    }
+    const e = list[i], q = getQuestion(e.pool, e.idx, e.qIdx);
+    $("#wArea").innerHTML = `
+    <div class="card flashcard">
+      <div class="fc-meta">【${POOL_LABEL[e.pool]}】第 ${i + 1} / ${list.length} 题</div>
+      <div class="q-text">${esc(q.q)}</div>
+      <div id="wOpts">${q.choices.map((c, k) => `<button class="opt" data-k="${k}"><b>${LETTERS[k]}.</b> ${esc(c)}</button>`).join("")}</div>
+      <div id="wFeed"></div>
+      <div class="btn-row"><button class="btn" id="wNext" style="display:none">下一题 →</button></div>
+    </div>`;
+    $("#wOpts .opt").forEach((b) => b.addEventListener("click", () => {
+      const k = +b.dataset.k, ok = k === q.answer;
+      $("#wOpts .opt").forEach((x, j) => { x.disabled = true; if (j === q.answer) x.classList.add("correct"); });
+      if (!ok) b.classList.add("wrong");
+      $("#wFeed").innerHTML = `<div class="explain">${ok ? "✅ 答对了，已从错题本移出" : "❌ 再看看解析"}<br>${esc(q.explain || "")}</div>`;
+      if (ok) { state.wrongbook = state.wrongbook.filter((x) => !(x.pool === e.pool && x.idx === e.idx && x.qIdx === e.qIdx)); removed++; }
+      else { recordAnswer(false, null); } // 仍然算作答，但保留在错题本
+      $("#wNext").style.display = "inline-block";
+    }));
+    $("#wNext").addEventListener("click", () => { i++; next(); });
+  };
+  next();
+}
+
+/* ============ 备考指南 ============ */
+function renderGuide(root) {
+  const E = EXAM_STRUCTURE;
+  root.innerHTML = `
+  <div class="page-head"><h1>📌 备考指南与资料库</h1><p class="muted">考试结构 · 评分标准 · 各 Part 策略 · 30 天计划 · 精选资源（日本）</p></div>
+
+  <div class="card"><h3>📋 考试结构（TOEIC L&R，共 2 小时 · 200 题 · 990 分）</h3>
+    ${E.sections.map((sec) => `<h4>${sec.name}（${sec.time} · ${sec.count} · ${sec.score}）</h4>
+      <table class="tbl"><tr><th>Part</th><th>题量</th><th>内容</th><th>要点</th></tr>
+      ${sec.parts.map((p) => `<tr><td><b>${p.p}</b></td><td>${p.n}</td><td>${p.d}</td><td class="tip-cell">${p.tip}</td></tr>`).join("")}</table>`).join("")}
+  </div>
+
+  <div class="card"><h3>🎚️ 分数段参考</h3>
+    <table class="tbl"><tr><th>分数</th><th>水平</th><th>说明</th></tr>
+    ${E.scoring.map((s) => `<tr><td><b>${s.band}</b></td><td>${s.level}</td><td>${s.note}</td></tr>`).join("")}</table>
+    <p class="muted">日本企业常见门槛：500（新卒最低线）・600（日常业务）・730（海外部署候补）・860（管理岗）。官方换算为非线性，本软件估算仅供参考。</p>
+  </div>
+
+  <div class="card"><h3>🇯🇵 日本报考信息</h3>
+    <table class="tbl">${JAPAN_INFO.map((r) => `<tr><th style="width:90px">${r.k}</th><td>${r.v}</td></tr>`).join("")}</table>
+  </div>
+
+  <div class="card"><h3>🏆 各 Part 高分策略</h3>
+    ${STRATEGIES.map((s) => `<details class="strategy"><summary>${s.icon} ${s.part}</summary><ul>${s.points.map((p) => "<li>" + p + "</li>").join("")}</ul></details>`).join("")}
+  </div>
+
+  <div class="card"><h3>🗓️ 30 天冲刺计划</h3>
+    ${STUDY_PLAN.map((w) => `<details class="strategy" ${w.week.startsWith("第 1") ? "open" : ""}><summary>${w.week}（${w.days}）</summary><ul>${w.tasks.map((t) => "<li>" + t + "</li>").join("")}</ul></details>`).join("")}
+  </div>
+
+  <div class="card"><h3>🔗 精选备考资源</h3>
+    ${RESOURCES.map((c) => `<h4>${c.icon} ${c.cat}</h4><ul class="res-list">${c.items.map((it) => `<li><a href="${it.url}" target="_blank" rel="noopener">${esc(it.name)}</a><br><span class="muted">${esc(it.desc)}</span></li>`).join("")}</ul>`).join("")}
+    <p class="muted">提示：链接在浏览器中打开；日本官方教材可在 Amazon.co.jp 或纪伊国屋购买，二手书也非常划算。</p>
+  </div>`;
+}
+
+/* ============ 启动 ============ */
+function buildNav() {
+  $("#nav").innerHTML = NAV.map(([id, label]) => `<button class="nav-btn" data-view="${id}">${label}</button>`).join("");
+  $(".nav-btn").forEach((b) => b.addEventListener("click", () => go(b.dataset.view)));
+}
+document.addEventListener("DOMContentLoaded", () => {
+  buildNav();
+  initVoices();
+  go("dashboard");
+});
+
+</script>
+</body>
+</html>
