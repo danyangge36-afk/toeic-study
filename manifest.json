@@ -1,0 +1,13 @@
+{
+  "name": "TOEIC 高分学习助手",
+  "short_name": "TOEIC 助手",
+  "description": "词汇 SRS · 听力 · 听写 · 阅读 · 全真模考 · 错题本，一站式托业备考",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#f3f5fb",
+  "theme_color": "#3552e0",
+  "icons": [
+    { "src": "icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any" }
+  ]
+}

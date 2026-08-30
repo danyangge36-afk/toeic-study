@@ -3,6 +3,8 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#3552e0">
+<link rel="manifest" href="manifest.json">
 <title>TOEIC 高分学习助手</title>
 <style>
 :root {
@@ -170,6 +172,41 @@ details.wrong-item summary { cursor: pointer; font-size: 14px; }
 .plan-item:last-child { border-bottom: none; }
 .plan-item input { width: auto; margin-top: 4px; accent-color: var(--brand); }
 .plan-item input:checked + span { text-decoration: line-through; color: var(--muted); }
+textarea { width: 100%; padding: 10px 12px; border: 1.5px solid var(--line); border-radius: 10px; font-family: inherit; font-size: 15px; background: #fff; color: var(--ink); resize: vertical; }
+.reco { background: var(--brand-soft); border-radius: 10px; padding: 10px 12px; font-size: 14px; }
+.mini-bar { display: inline-block; flex: 1; height: 8px; background: var(--brand-soft); border-radius: 99px; overflow: hidden; }
+.mini-bar i { display: block; height: 100%; border-radius: 99px; }
+.badge-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(88px, 1fr)); gap: 10px; }
+.badge { text-align: center; padding: 10px 4px; border: 1px solid var(--line); border-radius: 10px; opacity: .35; filter: grayscale(1); }
+.badge.on { opacity: 1; filter: none; background: var(--brand-soft); border-color: var(--brand); }
+.badge span { font-size: 22px; display: block; }
+.badge small { font-size: 11px; color: var(--muted); }
+.dict-diff { line-height: 2.1; font-size: 14.5px; }
+.w-miss { color: var(--bad); text-decoration: underline wavy; font-weight: 600; }
+.w-extra { color: #f59e0b; text-decoration: line-through; }
+
+/* ============ 深色模式 ============ */
+.dark {
+  --bg: #0e1320; --card: #161d2e; --ink: #e7ecf5; --muted: #94a0b8; --line: #2a3346;
+  --brand: #7d92ff; --brand-soft: #202a45; --good: #34d399; --good-soft: #123324; --bad: #f87171; --bad-soft: #3d1d1d;
+}
+.dark body { background: var(--bg); color: var(--ink); }
+.dark header { background: rgba(14, 19, 32, .92); border-color: var(--line); }
+.dark .btn, .dark .opt, .dark .chip { background: var(--card); color: var(--ink); border-color: var(--line); }
+.dark .btn:hover { border-color: var(--brand); color: var(--brand); }
+.dark .opt.correct { background: var(--good-soft); border-color: var(--good); }
+.dark .opt.wrong { background: var(--bad-soft); border-color: var(--bad); }
+.dark .opt.picked, .dark .opt.speaking { background: var(--brand-soft); border-color: var(--brand); }
+.dark input[type=date], .dark select, .dark textarea { background: var(--card); color: var(--ink); border-color: var(--line); }
+.dark .explain { background: #1a2233; border-left-color: var(--brand); }
+.dark .passage, .dark .transcript { background: #121a2b; border-color: var(--line); }
+.dark .photo-box { background: #1a2233; border-color: #33406b; }
+.dark .tbl th { background: #1a2233; }
+.dark .tbl th, .dark .tbl td { border-color: var(--line); }
+.dark .card.note { background: #25200f; border-color: #4d411c; }
+.dark .mock-bar { background: #090d17; }
+.dark .stat-row { border-color: var(--line); }
+.dark details.strategy { background: var(--card); border-color: var(--line); }
 footer { text-align: center; color: var(--muted); font-size: 12px; padding: 20px 0 8px; }
 @media (max-width: 640px) {
   .fc-word { font-size: 24px; }
@@ -181,6 +218,7 @@ footer { text-align: center; color: var(--muted); font-size: 12px; padding: 20px
 <header>
   <span class="logo">TOEIC 高分助手</span>
   <nav id="nav"></nav>
+  <button id="themeBtn" class="nav-btn" title="切换深色 / 浅色模式" style="margin-left:auto">🌙</button>
 </header>
 <main>
   <div id="view"></div>
@@ -189,5 +227,10 @@ footer { text-align: center; color: var(--muted); font-size: 12px; padding: 20px
 <script src="data_vocab.js"></script>
 <script src="data_questions.js"></script>
 <script src="app.js"></script>
+<script>
+if ("serviceWorker" in navigator && location.protocol === "https:") {
+  addEventListener("load", function () { navigator.serviceWorker.register("sw.js").catch(function () {}); });
+}
+</script>
 </body>
 </html>

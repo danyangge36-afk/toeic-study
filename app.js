@@ -14,12 +14,13 @@ const LETTERS = ["A", "B", "C", "D"];
 /* ============ 状态与存储 ============ */
 const STORE_KEY = "toeic_app_v1";
 let state = {
-  settings: { rate: 0.95, voiceURI: "", examDate: "", goal: 730, autoSpeak: true },
+  settings: { rate: 0.95, voiceURI: "", examDate: "", goal: 730, autoSpeak: true, darkMode: false },
   stats: { answered: 0, correct: 0, days: {} },
   vocab: {},            // "catId:idx" -> {box, ts}
   wrongbook: [],        // {pool, idx, qIdx, ts}
   mockHistory: [],
-  planChecks: {}        // 30 天计划勾选 "w周t任务" -> true
+  planChecks: {},       // 30 天计划勾选 "w周t任务" -> true
+  poolStats: {}         // 各题库作答统计 {pool: {a, c}}
 };
 function saveState() {
   try { localStorage.setItem(STORE_KEY, JSON.stringify(state)); } catch (e) { /* file:// 或隐私模式 */ }
@@ -33,8 +34,9 @@ function loadState() {
 loadState();
 state.planChecks = state.planChecks || {};   // 兼容旧存档
 state.stats.days = state.stats.days || {};
+state.poolStats = state.poolStats || {};
 
-const POOL_LABEL = { p1: "Part 1 照片", p2: "Part 2 问答", p3: "Part 3 对话", p4: "Part 4 短文", p5: "Part 5 填空", p6: "Part 6 长文", p7: "Part 7 阅读" };
+const POOL_LABEL = { p1: "Part 1 照片", p2: "Part 2 问答", p3: "Part 3 对话", p4: "Part 4 短文", p5: "Part 5 填空", p6: "Part 6 长文", p7: "Part 7 阅读", dict: "听写" };
 const ALL_POOLS = { p1: P1_DATA, p2: P2_DATA, p3: P3_DATA, p4: P4_DATA, p5: P5_DATA, p6: P6_DATA, p7: P7_DATA };
 
 function getQuestion(pool, idx, qIdx) {
@@ -51,11 +53,16 @@ function getQuestionText(pool, idx, qIdx) {
 }
 
 /* 记录一次作答 */
-function recordAnswer(isCorrect, wrongEntry) {
+function recordAnswer(isCorrect, wrongEntry, pool) {
   state.stats.answered++;
   if (isCorrect) state.stats.correct++;
   const t = todayStr();
   state.stats.days[t] = (state.stats.days[t] || 0) + 1;
+  if (pool) {
+    if (!state.poolStats[pool]) state.poolStats[pool] = { a: 0, c: 0 };
+    state.poolStats[pool].a++;
+    if (isCorrect) state.poolStats[pool].c++;
+  }
   if (!isCorrect && wrongEntry) addWrong(wrongEntry);
   saveState();
 }
@@ -141,6 +148,7 @@ const NAV = [
   ["dashboard", "🏠 首页"],
   ["vocab", "📖 词汇"],
   ["listening", "🎧 听力"],
+  ["dictation", "👂 听写"],
   ["reading", "📖 阅读"],
   ["mock", "⏱️ 模拟考试"],
   ["wrong", "❌ 错题本"],
@@ -151,10 +159,17 @@ function go(view) {
   stopSpeak();
   currentView = view;
   $$(".nav-btn").forEach((b) => b.classList.toggle("active", b.dataset.view === view));
-  const fn = { dashboard: renderDashboard, vocab: renderVocab, listening: renderListening, reading: renderReading, mock: renderMock, wrong: renderWrong, guide: renderGuide }[view];
+  const fn = { dashboard: renderDashboard, vocab: renderVocab, listening: renderListening, dictation: renderDictation, reading: renderReading, mock: renderMock, wrong: renderWrong, guide: renderGuide }[view];
   $("#view").innerHTML = "";
   fn($("#view"));
   window.scrollTo(0, 0);
+}
+
+function isDark() { return document.documentElement.classList.contains("dark"); }
+function applyTheme() {
+  document.documentElement.classList.toggle("dark", !!state.settings.darkMode);
+  const b = $("#themeBtn");
+  if (b) b.textContent = state.settings.darkMode ? "☀️" : "🌙";
 }
 
 /* ============ 首页 ============ */
@@ -162,10 +177,11 @@ function renderDashboard(root) {
   const s = state.stats;
   const acc = s.answered ? Math.round((s.correct / s.answered) * 100) : 0;
   const daysLeft = state.settings.examDate ? Math.ceil((new Date(state.settings.examDate + "T09:00:00") - new Date()) / 86400000) : null;
+  const rec = getRecommendation();
   root.innerHTML = `
   <div class="hero">
     <h1>TOEIC 高分学习助手</h1>
-    <p>词汇 · 听力 · 阅读 · 模考 · 错题本 —— 系统训练，目标高分</p>
+    <p>词汇 · 听力 · 听写 · 阅读 · 模考 · 错题本 —— 系统训练，目标高分</p>
   </div>
   <div class="grid grid-3">
     <div class="card">
@@ -186,13 +202,14 @@ function renderDashboard(root) {
       <div class="progress"><div style="width:${Math.round(masteredCount() / TOTAL_WORDS * 100)}%"></div></div>
     </div>
     <div class="card">
-      <h3>⚡ 快速开始</h3>
+      <h3>⚡ 今日推荐</h3>
+      <div class="reco">📌 ${esc(rec.text)}</div>
+      <button class="btn big" data-go="${rec.go}" style="margin-top:10px;border-color:var(--brand);color:var(--brand)">立即去做 →</button>
       <button class="btn big" data-go="vocab">背今天到期的单词（${dueWords("all").length} 个）</button>
-      <button class="btn big" data-go="listening">练听力（TTS 朗读）</button>
-      <button class="btn big" data-go="reading">刷阅读题</button>
       <button class="btn big" data-go="mock">做一次快速模考</button>
     </div>
   </div>
+  ${state.stats.answered ? `<div class="card"><h3>📊 各 Part 正确率</h3>${partAnalysisHTML()}<p class="muted">作答不足 8 题的部分暂不参与弱项判定。红色 = 低于 60%，黄色 = 60-79%。</p></div>` : ""}
   <div class="card">
     <h3>🏆 模考记录</h3>
     ${state.mockHistory.length ? `<table class="tbl"><tr><th>日期</th><th>类型</th><th>听力</th><th>阅读</th><th>合计（估算）</th></tr>
@@ -201,8 +218,9 @@ function renderDashboard(root) {
   </div>
   ${state.mockHistory.length ? `<div class="card"><h3>📈 分数曲线（估算分趋势）</h3>${scoreChartSVG()}<p class="muted">悬停圆点可查看每场详情。分数为按正确率折算的估算，趋势比单次分数更有意义。</p></div>` : ""}
   <div class="card"><h3>🔥 最近 30 天练习量</h3>${practiceChartSVG()}<p class="muted">统计所有作答（词汇 + 题目 + 模考）。目标：每天至少点亮一根柱子。</p></div>
+  <div class="card"><h3>🏅 成就</h3>${badgesHTML()}</div>
   <div class="card">
-    <h3>⚙️ 语音设置</h3>
+    <h3>⚙️ 设置与数据</h3>
     <label class="lbl">朗读速度 <span id="rateVal">${state.settings.rate}</span> 倍</label>
     <input type="range" id="rateRange" min="0.6" max="1.2" step="0.05" value="${state.settings.rate}">
     <label class="lbl">英语语音</label>
@@ -210,6 +228,9 @@ function renderDashboard(root) {
     <label class="lbl" style="display:flex;align-items:center;gap:8px;margin-top:10px"><input type="checkbox" id="autoSpeakChk" style="width:auto" ${state.settings.autoSpeak !== false ? "checked" : ""}> 进入词汇卡片时自动朗读单词</label>
     <p class="muted">听力练习使用浏览器自带语音合成（TTS）朗读，无需音频文件。建议选用 en-US 英式/美式人声。</p>
     <button class="btn" id="testSpeakBtn">试听：TOEIC test, Part Three. Listen to the conversation.</button>
+    <button class="btn" id="exportBtn" style="margin-left:8px">⬇️ 导出学习数据</button>
+    <button class="btn" id="importBtn">⬆️ 导入备份</button>
+    <input type="file" id="importFile" accept="application/json,.json" style="display:none">
     <button class="btn danger" id="resetBtn" style="margin-left:8px">清空全部学习数据</button>
   </div>
   <div class="card note">
@@ -222,11 +243,78 @@ function renderDashboard(root) {
   $("#voiceSelect").addEventListener("change", (e) => { state.settings.voiceURI = e.target.value; saveState(); });
   $("#autoSpeakChk").addEventListener("change", (e) => { state.settings.autoSpeak = e.target.checked; saveState(); });
   $("#testSpeakBtn").addEventListener("click", () => speakList([{ text: "TOEIC test, Part Three. Listen to the conversation. Then, choose the best answer to each question." }]));
+  $("#exportBtn").addEventListener("click", exportData);
+  $("#importBtn").addEventListener("click", () => $("#importFile").click());
+  $("#importFile").addEventListener("change", (e) => {
+    const f = e.target.files[0]; if (!f) return;
+    const r = new FileReader();
+    r.onload = () => { alert(importData(String(r.result)) === "ok" ? "导入成功！学习记录已恢复。" : "文件格式不正确，导入失败"); };
+    r.readAsText(f);
+  });
   $("#resetBtn").addEventListener("click", () => {
-    if (confirm("确定清空所有学习记录吗？此操作不可恢复。")) { state = { settings: state.settings, stats: { answered: 0, correct: 0, days: {} }, vocab: {}, wrongbook: [], mockHistory: [] }; saveState(); renderDashboard(root); }
+    if (confirm("确定清空所有学习记录吗？此操作不可恢复。")) { state = { settings: state.settings, stats: { answered: 0, correct: 0, days: {} }, vocab: {}, wrongbook: [], mockHistory: [], planChecks: {}, poolStats: {} }; saveState(); renderDashboard(root); }
   });
   $$("[data-go]", root).forEach((b) => b.addEventListener("click", () => go(b.dataset.go)));
   initVoices();
+}
+function getRecommendation() {
+  if (!state.stats.answered) return { text: "先做一次快速模考摸底，看看当前水平和弱项", go: "mock" };
+  if (state.wrongbook.length >= 10) return { text: "错题本已积累 " + state.wrongbook.length + " 题，清一遍错题本效果最好", go: "wrong" };
+  let weakest = null;
+  Object.keys(state.poolStats).forEach((k) => {
+    const s = state.poolStats[k];
+    if (k !== "dict" && s.a >= 8) { const acc = s.c / s.a; if (!weakest || acc < weakest.acc) weakest = { k: k, acc: acc }; }
+  });
+  if (weakest && weakest.acc < 0.75) {
+    const view = ["p5", "p6", "p7"].includes(weakest.k) ? "reading" : "listening";
+    return { text: "加强 " + POOL_LABEL[weakest.k] + "（正确率仅 " + Math.round(weakest.acc * 100) + "%，作答 " + state.poolStats[weakest.k].a + " 题）", go: view };
+  }
+  const due = dueWords("all").length;
+  if (due > 0) return { text: "背今天到期的 " + due + " 个单词（SRS 已排好）", go: "vocab" };
+  return { text: "做一次听写训练磨耳朵，保持听力手感", go: "dictation" };
+}
+function partAnalysisHTML() {
+  const keys = Object.keys(POOL_LABEL).filter((k) => state.poolStats[k] && state.poolStats[k].a);
+  if (!keys.length) return `<p class="muted">暂无数据</p>`;
+  return keys.map((k) => {
+    const s = state.poolStats[k], pct = Math.round(s.c / s.a * 100);
+    const color = pct >= 80 ? "var(--good)" : pct >= 60 ? "#f59e0b" : "var(--bad)";
+    return `<div class="stat-row"><span style="width:92px">${POOL_LABEL[k]}</span><span class="mini-bar"><i style="width:${pct}%;background:${color}"></i></span><span style="width:96px;text-align:right"><b>${pct}%</b> <span class="muted">(${s.c}/${s.a})</span></span></div>`;
+  }).join("");
+}
+function badgesHTML() {
+  const streak = calcStreak(), mastered = masteredCount(), ps = state.poolStats;
+  const listenAns = ["p1", "p2", "p3", "p4"].reduce((n, k) => n + (ps[k] ? ps[k].a : 0), 0);
+  const bestMock = state.mockHistory.reduce((m, h) => Math.max(m, scoreEst(h.lC, h.lT) + scoreEst(h.rC, h.rT)), 0);
+  const list = [
+    ["🎯", "初试身手", "完成第一题", state.stats.answered >= 1],
+    ["⚡", "百题斩", "累计作答 100 题", state.stats.answered >= 100],
+    ["🏹", "千题斩", "累计作答 1000 题", state.stats.answered >= 1000],
+    ["📚", "词汇新手", "掌握 50 词", mastered >= 50],
+    ["📖", "词汇大师", "掌握 300 词", mastered >= 300],
+    ["🔥", "七日之约", "连续打卡 7 天", streak >= 7],
+    ["🎧", "磨耳朵", "听力作答 50 题", listenAns >= 50],
+    ["📊", "首战模考", "完成一次模考", state.mockHistory.length >= 1],
+    ["🏆", "达标冲刺", "模考估算分达到目标线", !!state.settings.goal && bestMock > 0 && bestMock >= state.settings.goal]
+  ];
+  return `<div class="badge-grid">${list.map((b) => `<div class="badge ${b[3] ? "on" : ""}" title="${esc(b[2])}"><span>${b[0]}</span><small>${b[1]}</small></div>`).join("")}</div>`;
+}
+function exportData() {
+  const blob = new Blob([JSON.stringify(state)], { type: "application/json" });
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(blob);
+  a.download = "toeic-backup-" + todayStr().replace(/-/g, "") + ".json";
+  document.body.appendChild(a); a.click(); a.remove();
+  setTimeout(() => URL.revokeObjectURL(a.href), 3000);
+}
+function importData(text) {
+  try {
+    const obj = JSON.parse(text);
+    if (!obj || typeof obj !== "object" || !obj.stats || !obj.settings) return "invalid";
+    state = Object.assign(JSON.parse(JSON.stringify(state)), obj);
+    state.planChecks = state.planChecks || {}; state.stats.days = state.stats.days || {}; state.poolStats = state.poolStats || {};
+    saveState(); go(currentView); return "ok";
+  } catch (e) { return "invalid"; }
 }
 function scoreEst(c, t) { return t ? Math.round(c / t * 495 / 5) * 5 : 0; }
 
@@ -238,7 +326,7 @@ function scoreChartSVG() {
   const n = list.length;
   const x = (i) => (n === 1 ? (pl + (W - pl - pr) / 2) : pl + (W - pl - pr) * i / (n - 1));
   const pts = (key) => list.map((m, i) => x(i) + "," + y(key(m))).join(" ");
-  const grid = [0, 250, 500, 750, 1000].map((v) => `<line x1="${pl}" y1="${y(v)}" x2="${W - pr}" y2="${y(v)}" stroke="#e5e9f2"/><text x="${pl - 6}" y="${y(v) + 4}" text-anchor="end" font-size="10" fill="#9aa3b2">${v}</text>`).join("");
+  const grid = [0, 250, 500, 750, 1000].map((v) => `<line x1="${pl}" y1="${y(v)}" x2="${W - pr}" y2="${y(v)}" stroke="${isDark() ? "#2a3346" : "#e5e9f2"}"/><text x="${pl - 6}" y="${y(v) + 4}" text-anchor="end" font-size="10" fill="#9aa3b2">${v}</text>`).join("");
   const goal = state.settings.goal ? `<line x1="${pl}" y1="${y(state.settings.goal)}" x2="${W - pr}" y2="${y(state.settings.goal)}" stroke="#dc2626" stroke-dasharray="5 4" stroke-width="1.2"/><text x="${W - pr}" y="${y(state.settings.goal) - 4}" text-anchor="end" font-size="10" fill="#dc2626">目标 ${state.settings.goal}</text>` : "";
   const dots = list.map((m, i) => {
     const t = scoreEst(m.lC, m.lT) + scoreEst(m.rC, m.rT);
@@ -265,7 +353,7 @@ function practiceChartSVG() {
     return `<rect x="${pl + i * bw + 1.5}" y="${H - pb - h}" width="${bw - 3}" height="${h}" rx="2" fill="${x.key === todayStr() ? "#3552e0" : "#93a5f5"}"><title>${x.key}：${x.v} 题</title></rect>` +
       ((i % 5 === 0 || i === 29) ? `<text x="${pl + i * bw + bw / 2}" y="${H - 8}" text-anchor="middle" font-size="9.5" fill="#9aa3b2">${x.key.slice(5)}</text>` : "");
   }).join("");
-  const grid = [max, Math.round(max / 2), 0].map((v) => { const yy = H - pb - (H - pt - pb) * v / max; return `<line x1="${pl}" y1="${yy}" x2="${W - pr}" y2="${yy}" stroke="#eef1f6"/><text x="${pl - 5}" y="${yy + 4}" text-anchor="end" font-size="10" fill="#9aa3b2">${v}</text>`; }).join("");
+  const grid = [max, Math.round(max / 2), 0].map((v) => { const yy = H - pb - (H - pt - pb) * v / max; return `<line x1="${pl}" y1="${yy}" x2="${W - pr}" y2="${yy}" stroke="${isDark() ? "#242c40" : "#eef1f6"}"/><text x="${pl - 5}" y="${yy + 4}" text-anchor="end" font-size="10" fill="#9aa3b2">${v}</text>`; }).join("");
   return `<svg viewBox="0 0 ${W} ${H}" class="chart">${grid}${bars}</svg>`;
 }
 
@@ -452,7 +540,7 @@ function answerChoice(pool, idx, qIdx, choice, btn, choicesSel, feedSel, onDone)
   });
   if (!ok) btn.classList.add("wrong");
   $("#" + feedSel).innerHTML = `<div class="explain">${ok ? "✅ 正确！" : "❌ 正确答案：" + LETTERS[q.answer] + "。"} ${esc(q.explain || "")}</div>`;
-  recordAnswer(ok, ok ? null : { pool: pool, idx: idx, qIdx: qIdx === null ? 0 : qIdx });
+  recordAnswer(ok, ok ? null : { pool: pool, idx: idx, qIdx: qIdx === null ? 0 : qIdx }, pool);
   if (onDone) onDone(ok);
 }
 
@@ -524,6 +612,85 @@ function renderReadItem() {
     d.questions.forEach((q, qi) => $$("#tc" + qi + " .opt").forEach((btn) => btn.addEventListener("click", () => answerChoice("p7", it.idx, qi, +btn.dataset.k, btn, "tc" + qi, "tf" + qi, null))));
   }
   $("#rNext").addEventListener("click", () => { sess.i++; renderReadItem(); });
+}
+
+/* ============ 听写训练 ============ */
+let dict = null;
+function dictationSentences() {
+  const out = [];
+  P2_DATA.forEach((d) => out.push({ t: d.q, src: "Part 2 问答" }));
+  P3_DATA.forEach((g) => g.script.forEach((l) => out.push({ t: l.replace(/^[MWF]:\s*/, ""), src: "Part 3 对话" })));
+  P4_DATA.forEach((g) => {
+    g.script.replace(/([.?!])\s+/g, "$1|").split("|").forEach((s) => {
+      const t = s.trim();
+      if (t.split(/\s+/).length >= 6) out.push({ t: t, src: "Part 4 短文" });
+    });
+  });
+  return out;
+}
+function normWord(w) { return w.toLowerCase().replace(/[^a-z0-9']/g, ""); }
+function diffDictation(orig, typed) {
+  const O = orig.split(/\s+/).map(normWord).filter(Boolean);
+  const T = typed.split(/\s+/).map(normWord).filter(Boolean);
+  const m = O.length, n = T.length;
+  const dp = Array.from({ length: m + 1 }, () => new Array(n + 1).fill(0));
+  for (let i = 1; i <= m; i++) for (let j = 1; j <= n; j++) dp[i][j] = O[i - 1] === T[j - 1] ? dp[i - 1][j - 1] + 1 : Math.max(dp[i - 1][j], dp[i][j - 1]);
+  const out = []; let i = m, j = n, matched = 0;
+  while (i > 0 && j > 0) {
+    if (O[i - 1] === T[j - 1]) { out.unshift({ w: O[i - 1], ok: true }); matched++; i--; j--; }
+    else if (dp[i - 1][j] >= dp[i][j - 1]) { out.unshift({ w: O[i - 1], ok: false, type: "miss" }); i--; }
+    else { out.unshift({ w: T[j - 1], ok: false, type: "extra" }); j--; }
+  }
+  while (i > 0) { out.unshift({ w: O[i - 1], ok: false, type: "miss" }); i--; }
+  while (j > 0) { out.unshift({ w: T[j - 1], ok: false, type: "extra" }); j--; }
+  return { words: out, matched: matched, total: O.length };
+}
+function renderDictation(root) {
+  root.innerHTML = `
+  <div class="page-head"><h1>👂 听写训练</h1><p class="muted">最硬核的听力训练：听一句、写一句，系统逐词批改（大小写和标点不计）。先播一遍完整句子，写不出再重播。快捷键：数字 1-4 可用于选择题页，Enter 进入下一题。</p></div>
+  <div class="card">
+    <button class="btn big" id="dtStart">开始听写（每次 5 句）</button>
+    <p class="muted">句子来自 Part 2-4 题库，随机抽取（共 ${dictationSentences().length} 句）。建议朗读速度先调到 0.8 倍，逐步提速。</p>
+  </div>
+  <div id="dtArea"></div>`;
+  $("#dtStart").addEventListener("click", startDictation);
+}
+function startDictation() {
+  dict = { list: shuffle(dictationSentences()).slice(0, 5), i: 0 };
+  renderDictItem();
+}
+function renderDictItem() {
+  const area = $("#dtArea");
+  if (dict.i >= dict.list.length) {
+    area.innerHTML = `<div class="card"><h3>🎉 本轮听写完成！</h3><button class="btn" onclick="startDictation()">再来一组</button></div>`;
+    return;
+  }
+  const it = dict.list[dict.i];
+  area.innerHTML = `
+  <div class="card flashcard">
+    <div class="fc-meta">${esc(it.src)} · 第 ${dict.i + 1} / ${dict.list.length} 句 <button class="btn sm" id="dtPlay">🔊 播放（可反复）</button></div>
+    <textarea id="dtInput" rows="3" placeholder="把听到的句子打在这里…" style="width:100%;margin-top:8px"></textarea>
+    <div class="btn-row">
+      <button class="btn good" id="dtCheck">对答案</button>
+      <button class="btn" id="dtNext" style="display:none">下一句 →</button>
+    </div>
+    <div id="dtFeed"></div>
+  </div>`;
+  setTimeout(() => { const el = $("#dtInput"); if (el) { el.focus(); speakList([{ text: it.t }]); } }, 350);
+  $("#dtPlay").addEventListener("click", () => speakList([{ text: it.t }]));
+  $("#dtCheck").addEventListener("click", () => {
+    const typed = $("#dtInput").value;
+    if (!typed.trim()) return;
+    const res = diffDictation(it.t, typed);
+    const acc = Math.round(res.matched / Math.max(1, res.total) * 100);
+    const html = res.words.map((w) => !w.ok ? (w.type === "extra" ? `<span class="w-extra">${esc(w.w)}</span>` : `<span class="w-miss">${esc(w.w)}</span>`) : esc(w.w)).join(" ");
+    $("#dtFeed").innerHTML = `<div class="explain"><b>正确率 ${acc}%</b>（原文 ${res.total} 词，写对 ${res.matched} 词）<br><div class="dict-diff">${html}</div><div class="muted" style="margin-top:6px">原句：${esc(it.t)}</div></div>`;
+    $("#dtCheck").disabled = true;
+    $("#dtInput").disabled = true;
+    $("#dtNext").style.display = "inline-block";
+    recordAnswer(acc >= 90, null, "dict");
+  });
+  $("#dtNext").addEventListener("click", () => { dict.i++; renderDictItem(); });
 }
 
 /* ============ 模拟考试 ============ */
@@ -661,7 +828,7 @@ function finishMock() {
     const correct = mock.answers[key] === q.answer;
     const isL = ["p1", "p2", "p3", "p4"].includes(pool);
     if (correct) { isL ? lC++ : rC++; }
-    recordAnswer(correct, correct ? null : { pool: pool, idx: idx, qIdx: qi });
+    recordAnswer(correct, correct ? null : { pool: pool, idx: idx, qIdx: qi }, pool);
   });
   state.mockHistory.push({ date: todayStr(), kind: mock.kind, lC: lC, lT: lT, rC: rC, rT: rT });
   saveState();
@@ -732,7 +899,7 @@ function renderWrongPractice(root) {
       if (!ok) b.classList.add("wrong");
       $("#wFeed").innerHTML = `<div class="explain">${ok ? "✅ 答对了，已从错题本移出" : "❌ 再看看解析"}<br>${esc(q.explain || "")}</div>`;
       if (ok) { state.wrongbook = state.wrongbook.filter((x) => !(x.pool === e.pool && x.idx === e.idx && x.qIdx === e.qIdx)); removed++; }
-      else { recordAnswer(false, null); } // 仍然算作答，但保留在错题本
+      else { recordAnswer(false, null, e.pool); } // 仍然算作答，但保留在错题本
       $("#wNext").style.display = "inline-block";
     }));
     $("#wNext").addEventListener("click", () => { i++; next(); });
@@ -806,10 +973,31 @@ function renderGuide(root) {
 /* ============ 启动 ============ */
 function buildNav() {
   $("#nav").innerHTML = NAV.map(([id, label]) => `<button class="nav-btn" data-view="${id}">${label}</button>`).join("");
-  $$(".nav-btn").forEach((b) => b.addEventListener("click", () => go(b.dataset.view)));
+  $$(".nav-btn").forEach((b) => { if (!b.dataset.view) return; b.addEventListener("click", () => go(b.dataset.view)); });
+  $("#themeBtn").addEventListener("click", () => {
+    state.settings.darkMode = !state.settings.darkMode;
+    saveState(); applyTheme(); go(currentView);
+  });
 }
+document.addEventListener("keydown", (e) => {
+  const tag = (e.target.tagName || "").toLowerCase();
+  if (tag === "input" || tag === "textarea" || tag === "select" || e.ctrlKey || e.metaKey || e.altKey) return;
+  if (e.key === "Enter") {
+    const btn = ["#lNext", "#rNext", "#qNext", "#wNext", "#dtNext"].map((s) => $(s)).find((b) => b && b.style.display !== "none" && !b.disabled);
+    if (btn) { e.preventDefault(); btn.click(); }
+    return;
+  }
+  if (["1", "2", "3", "4"].includes(e.key)) {
+    const containers = $$("#qOpts, #lpChoices, #rpChoices, #mkc0, #mkc1, #mkc2, #mkc3, .q-choices");
+    for (const c of containers) {
+      const opts = $$(".opt:not(:disabled)", c);
+      if (opts.length) { const o = opts[+e.key - 1]; if (o) { e.preventDefault(); o.click(); } break; }
+    }
+  }
+});
 document.addEventListener("DOMContentLoaded", () => {
   buildNav();
+  applyTheme();
   initVoices();
   go("dashboard");
 });
