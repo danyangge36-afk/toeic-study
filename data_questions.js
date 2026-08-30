@@ -663,6 +663,37 @@ const P6_DATA = [
       { choices: ["available", "availability", "availably", "avail"], answer: 0, explain: "survey (which is) available at the link → 形容词作后置定语。" },
       { choices: ["for", "to", "with", "at"], answer: 0, explain: "discount code for online orders（用于网购的折扣码）。" }
     ]
+  },
+  {
+    title: "E-MAIL · 会议室预订回复",
+    type: "E-MAIL",
+    lines: [
+      "Dear Mr. Fontaine,",
+      "Thank you for your request to book the main conference room on September 3. I am pleased to ______(1) that the room is available from 1 p.m. to 4 p.m. on that day. Please note that room bookings are limited ______(2) four hours per department per week. Your request for video conferencing ______(3) has been forwarded to the IT team, which will set up the equipment before your meeting ______(4). If your plans change, kindly cancel the booking online so that other departments may use the room.",
+      "",
+      "Sincerely, Facility Services"
+    ],
+    blanks: [
+      { choices: ["inform", "informing", "informed", "be informed"], answer: 0, explain: "be pleased to + 动词原形。" },
+      { choices: ["at", "for", "to", "with"], answer: 2, explain: "be limited to（限制在……以内）固定搭配。" },
+      { choices: ["equip", "equipment", "equipped", "equipping"], answer: 1, explain: "video conferencing equipment → 需要名词。" },
+      { choices: ["begin", "begins", "began", "beginning"], answer: 1, explain: "before 引导的从句中主语 meeting 单数 → begins。" }
+    ]
+  },
+  {
+    title: "NOTICE · 停车新规",
+    type: "NOTICE",
+    lines: [
+      "NOTICE — New Parking Regulations",
+      "",
+      "______(1) October 1, all employees who park in the company lot must display a new parking sticker on the windshield. Stickers are free of ______(2) and can be obtained at the security office by presenting your employee ID. Vehicles ______(3) a valid sticker may be towed at the owner's expense. Visitors should register at the front desk and park in the visitor section on the ______(4) level. We appreciate your cooperation."
+    ],
+    blanks: [
+      { choices: ["Starting", "Started", "We start", "To start"], answer: 0, explain: "Starting October 1（从 10 月 1 日起）分词开头作状语。" },
+      { choices: ["charge", "fee", "cost", "price"], answer: 0, explain: "free of charge（免费）固定短语。" },
+      { choices: ["without", "with", "have", "having"], answer: 0, explain: "Vehicles without a valid sticker（没有有效贴纸的车辆）。" },
+      { choices: ["one", "first", "once", "firstly"], answer: 1, explain: "the first level（第一层）需要序数词。" }
+    ]
   }
 ];
 
@@ -793,6 +824,67 @@ const P7_DATA = [
       { q: "What does Mr. Maeda ask the admin office to confirm?", choices: ["The new departure time", "The morning schedule", "The taxi fare rate"], answer: 0, explain: "Could you confirm the new departure time?" },
       { q: "What are employees who work past 6:45 p.m. told to do?", choices: ["Take the next shuttle", "Claim travel expenses", "Work from home"], answer: 1, explain: "submit a travel expense claim。" },
       { q: "According to the notice, where can employees find the updated timetable?", choices: ["On the intranet", "In the e-mail", "At Central Station"], answer: 0, explain: "posted on the intranet and at the security desk。" }
+    ]
+  },
+  {
+    title: "MEMO · 远程办公新规", type: "MEMO", double: false,
+    passages: [
+      "MEMO\nTo: All employees\nFrom: HR Department\nSubject: Updated remote work guidelines\n\nBeginning next month, employees may work remotely up to three days per week, an increase from the current limit of two days. To be eligible, employees must have completed their probation period and have manager approval. Remote workdays should be recorded in the attendance system by the end of each week. Company laptops must be used with the security software enabled at all times, and confidential documents may not be printed at home. Employees who experience technical difficulties should contact the IT help desk, which now offers support until 8 p.m. on weekdays."
+    ],
+    questions: [
+      { q: "How many remote days per week will be allowed?", choices: ["Two", "Three", "Five"], answer: 1, explain: "up to three days per week（原为两天）。" },
+      { q: "Who is eligible for remote work?", choices: ["All employees", "Those with completed probation and manager approval", "Only new employees"], answer: 1, explain: "must have completed probation and have manager approval。" },
+      { q: "What are employees told NOT to do at home?", choices: ["Use company laptops", "Print confidential documents", "Contact the help desk"], answer: 1, explain: "confidential documents may not be printed at home。" }
+    ]
+  },
+  {
+    title: "ARTICLE · 河道清洁志愿日", type: "ARTICLE", double: false,
+    passages: [
+      "Community News — River Cleanup Day Draws Record Volunteers\n\nMore than 300 residents joined last Saturday's annual river cleanup, twice as many as last year. Organizers credit the increase to local companies, which gave employees a paid day off to volunteer. Participants collected 1.2 tons of trash along the eight-kilometer riverside path, including plastic bottles, old bicycle parts, and fishing gear. The city provided gloves, trash bags, and free lunch boxes, and a local bakery donated coffee and bread for the morning break. Based on this year's turnout, the city plans to hold the event twice a year beginning next spring and to add a second cleanup site at the harbor."
+    ],
+    questions: [
+      { q: "Why did more people join this year?", choices: ["The weather was better", "Companies offered paid volunteer leave", "The event moved to Saturday"], answer: 1, explain: "local companies gave employees a paid day off to volunteer。" },
+      { q: "Who provided free lunch boxes?", choices: ["A local bakery", "The city", "The volunteers"], answer: 1, explain: "The city provided... free lunch boxes（面包店提供的是咖啡和面包）。" },
+      { q: "What will the city do beginning next spring?", choices: ["Extend the riverside path", "Hold cleanups twice a year", "Ban plastic bottles"], answer: 1, explain: "hold the event twice a year beginning next spring。" }
+    ]
+  },
+  {
+    title: "双篇 · 家具促销与送货咨询", type: "AD + E-MAIL", double: true,
+    passages: [
+      "[ADVERTISEMENT]\nKanto Furniture Warehouse — Spring Sale\n\nThree days only: May 17-19. All sofa sets and dining tables are 30 percent off, and delivery is free for orders over 50,000 yen. Free delivery covers areas within 30 kilometers of our Chofu warehouse; for other areas, a flat fee of 2,500 yen applies. Delivery dates can be selected at checkout, and all purchases include a five-year warranty. As always, our design consultants are available in-store on weekends, no appointment needed.",
+      "[E-MAIL]\nFrom: R. Sonobe\nTo: Kanto Furniture Warehouse\nSubject: Delivery question — order 88231\n\nHello,\n\nI ordered a dining table (order 88231) during your spring sale and selected Saturday delivery. My home is in Urawa, which I understand is outside the 30-kilometer free delivery area, but I was not charged any delivery fee. Could you confirm whether the fee will be added later? Also, would it be possible to change the delivery date from Saturday to Sunday? I work every Saturday this month.\n\nR. Sonobe"
+    ],
+    questions: [
+      { q: "What is being promoted?", choices: ["Free design consultations", "A three-day sale", "A new warehouse opening"], answer: 1, explain: "Spring Sale, three days only: May 17-19。" },
+      { q: "Which customers receive free delivery?", choices: ["Those who order sofa sets", "Those within 30 kilometers of the warehouse", "Those who spend over 2,500 yen"], answer: 1, explain: "Free delivery covers areas within 30 kilometers（此外按订单金额免运费是另一条规则，注意区分）。" },
+      { q: "Why was Mr. Sonobe probably not charged a delivery fee?", choices: ["He paid during the sale", "The fee will be added later", "He selected Saturday delivery"], answer: 1, explain: "他住在免费区外却被未收费，所以推测 fee will be added later。" },
+      { q: "What change does Mr. Sonobe request?", choices: ["A different delivery day", "A larger discount", "A different table"], answer: 0, explain: "change the delivery date from Saturday to Sunday。" }
+    ]
+  },
+  {
+    title: "双篇 · 四楼装修临时搬迁", type: "NOTICE + E-MAIL", double: true,
+    passages: [
+      "[NOTICE]\nTemporary Office Relocation — 4th Floor Renovation\n\nFrom June 9 to July 25, the fourth floor will be renovated. During this period, all fourth-floor departments will operate from the sixth floor. Meeting room reservations for rooms 401-405 are canceled; please book rooms on the sixth floor instead, using the usual intranet system. The employee lounge on the fourth floor will be closed, but the second-floor lounge will extend its hours from 7 a.m. to 8 p.m. Mail deliveries will be collected from the temporary reception desk near the elevator on the sixth floor.",
+      "[E-MAIL]\nFrom: A. Kurihara\nTo: Facility management\nSubject: Question about the renovation\n\nHi,\n\nI work in marketing on the fourth floor. I understand we are moving to the sixth floor next week. Could you tell me whether the lockers on the fourth floor will be accessible during the renovation? I keep some presentation materials there that I will need in July. Also, is the sixth-floor meeting room booking system the same one we normally use? I have several workshops planned and want to reserve rooms in advance.\n\nA. Kurihara"
+    ],
+    questions: [
+      { q: "Why are departments moving?", choices: ["The sixth floor is larger", "The fourth floor is being renovated", "The building lease is ending"], answer: 1, explain: "the fourth floor will be renovated。" },
+      { q: "What change affects the second-floor lounge?", choices: ["It will close for renovation", "Its hours are being extended", "It is moving to the sixth floor"], answer: 1, explain: "the second-floor lounge will extend its hours from 7 a.m. to 8 p.m。" },
+      { q: "What does Ms. Kurihara want to take out of her locker?", choices: ["Presentation materials", "Office supplies", "Mail"], answer: 0, explain: "I keep some presentation materials there。" },
+      { q: "What does Ms. Kurihara plan to do in advance?", choices: ["Book meeting rooms", "Move her desk", "Collect her mail"], answer: 0, explain: "want to reserve rooms in advance。" }
+    ]
+  },
+  {
+    title: "双篇 · 写作研讨会报名", type: "AD + E-MAIL", double: true,
+    passages: [
+      "[ADVERTISEMENT]\nProfessional Development Seminar\n\"Effective Business Writing in the Digital Age\"\nDate: Sunday, November 9, 1:00-4:30 p.m.\nVenue: Sun Center Hotel, 3F Conference Room B\nFee: 12,000 yen (9,600 yen for J-Business Association members)\n\nRegistration closes November 2 or when seats sell out (capacity: 60). All participants receive a 90-page workbook and one month of free access to the online writing course. A certificate of completion will be issued to those who attend all three sessions.",
+      "[E-MAIL]\nFrom: seminars@jbizassoc.jp\nTo: m.takeda@gmail.com\nSubject: Registration confirmed — Business Writing Seminar, Nov 9\n\nDear Ms. Takeda,\n\nThank you for registering for the Effective Business Writing seminar on November 9. As a member of the J-Business Association, you received the member rate; your payment of 9,600 yen has been confirmed. Please bring this e-mail and a photo ID on the day. Check-in opens at 12:30 p.m. Your workbook will be provided at the venue, and your one-month online course access begins on November 10. If you cannot attend, let us know by November 2 for a full refund.\n\nJ-Business Association"
+    ],
+    questions: [
+      { q: "What is the regular (non-member) fee?", choices: ["9,600 yen", "12,000 yen", "60,000 yen"], answer: 1, explain: "Fee: 12,000 yen（会员价 9,600）。" },
+      { q: "What will participants who attend all sessions receive?", choices: ["A workbook", "A certificate", "A refund"], answer: 1, explain: "A certificate of completion... who attend all three sessions。" },
+      { q: "Why does Ms. Takeda pay 9,600 yen?", choices: ["She registered early", "She is a member of the association", "She attends online only"], answer: 1, explain: "As a member..., you received the member rate。" },
+      { q: "What will Ms. Takeda receive on November 10?", choices: ["Her workbook", "Her certificate", "Online course access"], answer: 2, explain: "course access begins on November 10（workbook 当天在会场发）。" }
     ]
   }
 ];

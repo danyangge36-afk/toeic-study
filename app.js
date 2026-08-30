@@ -285,7 +285,7 @@ function nextVocabCard() {
     $("#fcYes").addEventListener("click", () => { updateVocab(item.cat.id, item.i, true); sess.correct++; sess.i++; nextVocabCard(); });
     $("#fcNo").addEventListener("click", () => { updateVocab(item.cat.id, item.i, false); sess.i++; nextVocabCard(); });
   } else {
-    const wrongPool = shuffle(VOCAB_DATA.reduce((a, c) => a.concat(c.words.filter((w) => w.zh !== item.w.zh)), [])).slice(0, 3).map((w) => w.zh);
+    const wrongPool = shuffle(VOCAB_DATA.reduce((a, c) => a.concat(c.words.filter((w) => w.zh !== item.w.zh && w.w.toLowerCase() !== item.w.w.toLowerCase())), [])).slice(0, 3).map((w) => w.zh);
     const opts = shuffle([item.w.zh].concat(wrongPool));
     area.innerHTML = `
     <div class="card flashcard">
@@ -410,8 +410,8 @@ function answerChoice(pool, idx, qIdx, choice, btn, choicesSel, feedSel, onDone)
 let readSession = null;
 const READ_PARTS = [
   ["p5", "Part 5 · 短文填空", "50 题", "语法与词汇，目标 20-30 秒/题"],
-  ["p6", "Part 6 · 长文填空", "8 篇 × 4 空", "结合上下文选词"],
-  ["p7", "Part 7 · 阅读理解", "8 单篇 + 3 双篇", "先读题干再回原文定位"]
+  ["p6", "Part 6 · 长文填空", "10 篇 × 4 空", "结合上下文选词"],
+  ["p7", "Part 7 · 阅读理解", "10 单篇 + 6 双篇", "先读题干再回原文定位"]
 ];
 function renderReading(root) {
   root.innerHTML = `
