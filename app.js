@@ -192,8 +192,8 @@ function renderDashboard(root) {
   </div>
   <div class="card">
     <h3>🏆 模考记录</h3>
-    ${state.mockHistory.length ? `<table class="tbl"><tr><th>日期</th><th>听力</th><th>阅读</th><th>合计（估算）</th></tr>
-      ${state.mockHistory.slice(-5).reverse().map((m) => `<tr><td>${m.date}</td><td>${m.lC}/${m.lT}</td><td>${m.rC}/${m.rT}</td><td><b>${scoreEst(m.lC, m.lT) + scoreEst(m.rC, m.rT)}</b></td></tr>`).join("")}
+    ${state.mockHistory.length ? `<table class="tbl"><tr><th>日期</th><th>类型</th><th>听力</th><th>阅读</th><th>合计（估算）</th></tr>
+      ${state.mockHistory.slice(-5).reverse().map((m) => `<tr><td>${m.date}</td><td>${m.kind ? (MOCK_LABEL[m.kind] || m.kind) : "—"}</td><td>${m.lC}/${m.lT}</td><td>${m.rC}/${m.rT}</td><td><b>${scoreEst(m.lC, m.lT) + scoreEst(m.rC, m.rT)}</b></td></tr>`).join("")}
     </table>` : `<p class="muted">还没有模考记录。建议每周做 1-2 次快速模考检验进度。</p>`}
   </div>
   <div class="card">
@@ -478,29 +478,41 @@ function renderReadItem() {
 
 /* ============ 模拟考试 ============ */
 let mock = null;
+const MOCK_LABEL = { full: "全真模考", quick: "快速模考", listen: "听力专项", read: "阅读专项" };
+const mockMinutes = (kind) => ({ full: 120, quick: 45, listen: 25, read: 30 }[kind] || 45);
 function renderMock(root) {
   root.innerHTML = `
   <div class="page-head"><h1>⏱️ 模拟考试</h1><p class="muted">从题库随机抽题组卷，严格计时。成绩为按比例折算的<b>估算分</b>，仅供参考趋势。</p></div>
   <div class="grid grid-2">
+    <div class="card" style="border-color:var(--brand)"><h3>🏆 全真模考</h3><p>听力 97 题（P1×6 / P2×25 / P3 全部 / P4 全部）+ 阅读 100 题（P5×30 / P6×4 篇 / P7 单双篇全量）<br><b>限时 120 分钟</b>（真实考试 45+75 节奏，听转读时有提示）</p><button class="btn big" data-m="full">开始</button></div>
     <div class="card"><h3>🎯 快速模考</h3><p>听力 22 题 + 阅读 26 题<br>限时 45 分钟</p><button class="btn big" data-m="quick">开始</button></div>
     <div class="card"><h3>🎧 听力专项</h3><p>Part 1-4 共 22 题<br>限时 25 分钟</p><button class="btn big" data-m="listen">开始</button></div>
     <div class="card"><h3>📖 阅读专项</h3><p>Part 5-7 共 26 题<br>限时 30 分钟</p><button class="btn big" data-m="read">开始</button></div>
-    <div class="card note"><h3>ℹ️ 说明</h3><p>· 每部分从题库随机抽取，多刷几套覆盖面更广<br>· 听力每段只播一遍（可点重播按钮）<br>· 估算分 = 正确率 × 495（实际官方换算为非线性）</p></div>
+    <div class="card note"><h3>ℹ️ 说明</h3><p>· 每部分从题库随机抽取，多刷几套覆盖面更广<br>· 听力每段只播一遍（可点重播按钮）<br>· 全真模考 P7 单篇双篇全部使用，最接近真实考试<br>· 估算分 = 正确率 × 495（实际官方换算为非线性）</p></div>
   </div>`;
   $$("[data-m]", root).forEach((b) => b.addEventListener("click", () => startMock(b.dataset.m)));
 }
 function buildMockItems(kind) {
   const pick = (pool, n) => shuffle(ALL_POOLS[pool].map((_, i) => ({ pool: pool, idx: i }))).slice(0, n);
   let L = [], R = [];
+  if (kind === "full") {
+    L = [].concat(pick("p1", Math.min(6, ALL_POOLS.p1.length)), pick("p2", Math.min(25, ALL_POOLS.p2.length)),
+      ALL_POOLS.p3.map((_, i) => ({ pool: "p3", idx: i })), ALL_POOLS.p4.map((_, i) => ({ pool: "p4", idx: i })));
+    const singles = ALL_POOLS.p7.map((d, i) => ({ pool: "p7", idx: i })).filter((x) => !ALL_POOLS.p7[x.idx].double);
+    const doubles = ALL_POOLS.p7.map((d, i) => ({ pool: "p7", idx: i })).filter((x) => ALL_POOLS.p7[x.idx].double);
+    R = [].concat(pick("p5", Math.min(30, ALL_POOLS.p5.length)), shuffle(ALL_POOLS.p6.map((_, i) => ({ pool: "p6", idx: i }))).slice(0, 4), shuffle(singles), shuffle(doubles));
+    return { L: L, R: R, minutes: 120 };
+  }
   if (kind !== "read") { L = [].concat(pick("p1", 2), pick("p2", 8), pick("p3", 2), pick("p4", 2)); }
   if (kind !== "listen") {
     const singles = ALL_POOLS.p7.map((d, i) => ({ pool: "p7", idx: i })).filter((x) => !ALL_POOLS.p7[x.idx].double);
     const doubles = ALL_POOLS.p7.map((d, i) => ({ pool: "p7", idx: i })).filter((x) => ALL_POOLS.p7[x.idx].double);
     R = [].concat(pick("p5", 15), pick("p6", 1), shuffle(singles).slice(0, 1), shuffle(doubles).slice(0, 1));
   }
-  return { L: L, R: R, minutes: kind === "quick" ? 45 : kind === "listen" ? 25 : 30 };
+  return { L: L, R: R, minutes: mockMinutes(kind) };
 }
 function startMock(kind) {
+  if (kind === "full" && !confirm("全真模考约需 2 小时（听力 97 题 + 阅读 100 题，限时 120 分钟），建议找个完整时间段。确定开始？")) return;
   const built = buildMockItems(kind);
   mock = { kind: kind, L: built.L, R: built.R, i: 0, answers: {}, endAt: Date.now() + built.minutes * 60000, list: [].concat(built.L, built.R) };
   renderMockItem();
@@ -521,6 +533,7 @@ function mockGroupQCount(it) {
 function renderMockItem() {
   const area = $("#view");
   if (mock.i >= mock.list.length) return finishMock();
+  stopSpeak();
   const it = mock.list[mock.i];
   const isListen = mock.i < mock.L.length;
   const d = ALL_POOLS[it.pool][it.idx];
@@ -550,6 +563,7 @@ function renderMockItem() {
     <span class="timer" id="mockTimer">--:--</span>
     <button class="btn sm" id="mkSubmit">交卷</button>
   </div>
+  ${mock.kind === "full" && mock.i === mock.L.length ? `<div class="card note">🎧 <b>听力部分结束！</b>现在进入阅读部分（建议 75 分钟内完成，总倒计时已包含）。点击「下一组」开始 Part 5。</div>` : ""}
   <div class="card">${body}
     <div class="btn-row" style="margin-top:14px">
       ${mock.i > 0 ? `<button class="btn" id="mkPrev">← 上一组</button>` : ""}
@@ -599,11 +613,13 @@ function finishMock() {
     if (correct) { isL ? lC++ : rC++; }
     recordAnswer(correct, correct ? null : { pool: pool, idx: idx, qIdx: qi });
   });
-  state.mockHistory.push({ date: todayStr(), lC: lC, lT: lT, rC: rC, rT: rT });
+  state.mockHistory.push({ date: todayStr(), kind: mock.kind, lC: lC, lT: lT, rC: rC, rT: rT });
   saveState();
   const lS = scoreEst(lC, lT), rS = scoreEst(rC, rT);
+  const kindLabel = MOCK_LABEL[mock.kind] || "模考";
+  const usedMin = Math.max(1, Math.round((Date.now() - (mock.endAt - mockMinutes(mock.kind) * 60000)) / 60000));
   $("#view").innerHTML = `
-  <div class="page-head"><h1>📊 模考成绩</h1><p class="muted">${todayStr()} · 用时 ${Math.max(1, Math.round((Date.now() - (mock.endAt - (mock.kind === "quick" ? 45 : mock.kind === "listen" ? 25 : 30) * 60000)) / 60000))} 分钟（估算分，按正确率折算）</p></div>
+  <div class="page-head"><h1>📊 ${kindLabel}成绩</h1><p class="muted">${todayStr()} · 用时 ${usedMin} 分钟（估算分，按正确率折算）</p></div>
   <div class="grid grid-3">
     <div class="card center"><div class="score-num">${lS}</div><div class="muted">听力估算（${lC}/${lT}）</div></div>
     <div class="card center"><div class="score-num">${rS}</div><div class="muted">阅读估算（${rC}/${rT}）</div></div>
