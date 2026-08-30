@@ -2121,6 +2121,8 @@ function loadState() {
   } catch (e) { }
 }
 loadState();
+state.planChecks = state.planChecks || {};   // 兼容旧存档
+state.stats.days = state.stats.days || {};
 
 const POOL_LABEL = { p1: "Part 1 照片", p2: "Part 2 问答", p3: "Part 3 对话", p4: "Part 4 短文", p5: "Part 5 填空", p6: "Part 6 长文", p7: "Part 7 阅读" };
 const ALL_POOLS = { p1: P1_DATA, p2: P2_DATA, p3: P3_DATA, p4: P4_DATA, p5: P5_DATA, p6: P6_DATA, p7: P7_DATA };
